@@ -1,0 +1,52 @@
+service: VentRent
+
+# Use serverless-webpack plugin to transpile ES6/ES7
+plugins:
+  - serverless-webpack
+  - serverless-offline
+  
+# Enable auto-packing of external modules
+custom:
+  webpackIncludeModules: true
+  basePath: Vent.Rent/
+  stage: ${opt:stage, self:provider.stage}
+  namespace: ${self:service}-${self:custom.stage}
+  author: Mais Eid
+
+provider:
+  name: aws
+  runtime: nodejs6.10
+  stage: prod
+  region: us-east-1
+  stackTags:
+    AppName: ${self:service}
+    Author: ${self:custom.author}
+    Namespace: ${self:custom.namespace}
+
+ # 'iamRoleStatement' defines the permission policy for the Lambda function.
+  # In this case Lambda functions are granted with permissions to access DynamoDB.
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:DescribeTable
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+      Resource: "arn:aws:dynamodb:us-east-1:*:*"
+
+functions:
+  get:
+    handler: handler.get
+    events:
+      - http:
+          path: ${self:custom.basePath}Landlord/{first_name}/{last_name}
+          method: get
+          cors: true
+          request:
+            parameters:
+              paths:
+                first_name: true
+                last_name: true
+
