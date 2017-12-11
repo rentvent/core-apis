@@ -23,7 +23,7 @@ To work Offline
   
 To Deploy on AWS 
 
-sls deploy —> “fOR all project “ 
+sls deploy —> “deploy all lambda functions “ 
 sls deployfunction -f FuncName.  —> “ Deploy just one function “
 
 To Delete Stack 
