@@ -1,7 +1,7 @@
 import * as dynamoDbLib from "./libs/dynamodb-lib";
 import { success, failure } from "./libs/response-lib";
 
-export async function get(event, context, callback) {
+export async function getlandlord(event, context, callback) {
   const params = {
     TableName: 'rv_landlord',
     FilterExpression: "L_First_Name = :fname AND L_Last_Name= :lname",
@@ -10,9 +10,44 @@ export async function get(event, context, callback) {
             ":lname": event.pathParameters.last_name.toLowerCase()
           }    
   };
-  console.log(params.ExpressionAttributeValues);
   try {
     const result = await dynamoDbLib.call("scan", params);
+    callback(null, success(result));
+  } catch (e) {
+    callback(null, failure(e));
+  }
+}
+
+
+export async function getproperty(event, context, callback) {
+  const params = {
+    TableName: 'rv_property',
+    KeyConditionExpression: "P_ID = :p_id",
+    
+    ExpressionAttributeValues: {
+            ":p_id":parseInt(event.pathParameters.p_id,10)
+          }    
+  };
+  try {
+    const result = await dynamoDbLib.call("query", params);
+    callback(null, success(result));
+  } catch (e) {
+    callback(null, failure(e));
+  }
+}
+
+
+export async function getrental(event, context, callback) {
+  const params = {
+    TableName: 'rv_rental',
+    KeyConditionExpression: "rental_id = :r_id",
+    
+    ExpressionAttributeValues: {
+            ":r_id":parseInt(event.pathParameters.r_id,10)
+          }    
+  };
+  try {
+    const result = await dynamoDbLib.call("query", params);
     callback(null, success(result));
   } catch (e) {
     callback(null, failure(e));

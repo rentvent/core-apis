@@ -37,11 +37,11 @@ provider:
       Resource: "arn:aws:dynamodb:us-east-1:*:*"
 
 functions:
-  get:
-    handler: handler.get
+  getLandlord:
+    handler: handler.getlandlord
     events:
       - http:
-          path: ${self:custom.basePath}Landlord/{first_name}/{last_name}
+          path: ${self:custom.basePath}landlord/{first_name}/{last_name}
           method: get
           cors: true
           request:
@@ -49,4 +49,29 @@ functions:
               paths:
                 first_name: true
                 last_name: true
+
+  getProperty:
+    handler: handler.getproperty
+    events:
+      - http:
+          path: ${self:custom.basePath}property/{p_id}
+          method: get
+          cors: true
+          request:
+            parameters:
+              paths:
+                p_id: true
+
+  getRental:
+    handler: handler.getrental
+    events:
+      - http:
+          path: ${self:custom.basePath}rental/{r_id}
+          method: get
+          cors: true
+          request:
+            parameters:
+              paths:
+                r_id: true
+               
 
