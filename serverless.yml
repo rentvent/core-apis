@@ -73,5 +73,28 @@ functions:
             parameters:
               paths:
                 r_id: true
+  getQuestionnaire:
+    handler: handler.getQuestionnaire
+    events:
+      - http:
+          path: ${self:custom.basePath}questionnaire/{q_id}
+          method: get
+          cors: true
+          request:
+            parameters:
+              paths:
+                q_id: true
+  getComplaints:
+    handler: handler.getComplaints
+    events:
+      - http:
+          path: ${self:custom.basePath}Complaints/{c_id}
+          method: get
+          cors: true
+          request:
+            parameters:
+              paths:
+                c_id: true
+               
                
 

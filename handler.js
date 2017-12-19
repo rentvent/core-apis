@@ -53,3 +53,39 @@ export async function getrental(event, context, callback) {
     callback(null, failure(e));
   }
 }
+
+
+export async function getQuestionnaire (event,context,callback){
+  const params = { 
+    TableName: 'Questionnaire',
+    KeyConditionExpression: "Q_ID = :q_id",
+    ExpressionAttributeValues:{
+      ":q_id":parseInt(event.pathParameters.q_id,10)
+    }
+  };
+
+  try{
+    const result = await dynamoDbLib.call("query", params);
+    callback(null, success(result));
+  }catch(e){
+    callback(null, failure(e));
+  }
+}
+
+
+export async function getComplaints (event,context,callback){
+  const params = { 
+    TableName: 'Complaints',
+    KeyConditionExpression: "C_ID = :c_id",
+    ExpressionAttributeValues:{
+      ":c_id":parseInt(event.pathParameters.c_id,10)
+    }
+  };
+
+  try{
+    const result = await dynamoDbLib.call("query", params);
+    callback(null, success(result));
+  }catch(e){
+    callback(null, failure(e));
+  }
+}
