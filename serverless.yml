@@ -38,7 +38,7 @@ provider:
 
 functions:
   getLandlord:
-    handler: handler.getlandlord
+    handler: api/landlord/_get.getlandlord
     events:
       - http:
           path: ${self:custom.basePath}landlord/{first_name}/{last_name}
@@ -51,7 +51,7 @@ functions:
                 last_name: true
 
   getProperty:
-    handler: handler.getproperty
+    handler: api/property/_get.getproperty
     events:
       - http:
           path: ${self:custom.basePath}property/{p_id}
@@ -63,7 +63,7 @@ functions:
                 p_id: true
 
   getRental:
-    handler: handler.getrental
+    handler: api/rental/_get.getrental
     events:
       - http:
           path: ${self:custom.basePath}rental/{r_id}
@@ -74,18 +74,19 @@ functions:
               paths:
                 r_id: true
   getQuestionnaire:
-    handler: handler.getQuestionnaire
+    handler: api/questionnaire/_get.getQuestionnaire
     events:
       - http:
-          path: ${self:custom.basePath}questionnaire/{q_id}
+          path: ${self:custom.basePath}questionnaire/{search_by}/{search_val}
           method: get
           cors: true
           request:
             parameters:
               paths:
-                q_id: true
+                search_by: true
+                search_val: true
   getComplaints:
-    handler: handler.getComplaints
+    handler: api/complaints/_get.getComplaints
     events:
       - http:
           path: ${self:custom.basePath}Complaints/{c_id}
@@ -95,6 +96,25 @@ functions:
             parameters:
               paths:
                 c_id: true
+  
+  postPrimaryForm:
+    handler: api/questionnaire/_post.QuestionnairePrimaryForm
+    events:
+      - http:
+          path: ${self:custom.basePath}questionnaire/primary
+          method: post
+          cors: true
+          
+  postSecondaryForm:
+    handler: api/questionnaire/_post.QuestionnaireSecondaryForm
+    events:
+      - http:
+          path: ${self:custom.basePath}questionnaire/secondary
+          method: post
+          cors: true
+        
+
+  
                
                
 
