@@ -97,19 +97,19 @@ functions:
               paths:
                 c_id: true
   
-  postPrimaryForm:
-    handler: api/questionnaire/_post.QuestionnairePrimaryForm
+  submiteQuestionnaire:
+    handler: api/questionnaire/_post.submiteQuestionnaire
     events:
       - http:
-          path: ${self:custom.basePath}questionnaire/primary
+          path: ${self:custom.basePath}questionnaire
           method: post
           cors: true
           
-  postSecondaryForm:
-    handler: api/questionnaire/_post.QuestionnaireSecondaryForm
+  createTenant:
+    handler: api/tenant/_post.createTenant
     events:
       - http:
-          path: ${self:custom.basePath}questionnaire/secondary
+          path: ${self:custom.basePath}tenant
           method: post
           cors: true
         

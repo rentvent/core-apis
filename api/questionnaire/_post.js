@@ -3,7 +3,7 @@ import { success, failure } from "../../libs/response-lib";
 import uuid from "uuid";
 
 
-export async function QuestionnairePrimaryForm(event, context, callback) {
+export async function submiteQuestionnaire(event, context, callback) {
 
     const data = JSON.parse(event.body);
     const params = {
@@ -28,7 +28,7 @@ export async function QuestionnairePrimaryForm(event, context, callback) {
         callback(null, failure(e));
     }
 }
-
+/*
 export async function QuestionnaireSecondaryForm(event, context, callback) {
 
     const data = JSON.parse(event.body);
@@ -67,4 +67,4 @@ export async function QuestionnaireSecondaryForm(event, context, callback) {
     } catch (e) {
         callback(null, failure(e));
     }
-}
+}*/
