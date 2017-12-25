@@ -9,13 +9,7 @@ Prerequisites:
 
 3) Credentials Configuration 
 
-AWS Account for Dynamo: rv_nonprod 
-Access Key ID: AKIAJHHO3XW5OWT4LX2Q
-Secret Access Key: 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
 
-
-
-serverless config credentials --provider aws --key AKIAJHHO3XW5OWT4LX2Q --secret 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 --profile rv_nonprod -o
 
 
 To work Offline 
