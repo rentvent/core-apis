@@ -7,11 +7,7 @@ Prerequisites:
 1) NodeJS 6.10
 2) Serverless Framework 1.23 —> npm i -g serverless
 
-3) Credentials Configuration 
-
-
-
-
+Please note :  the node_mpdel already pushed in reposotiry 
 To work Offline 
  1- install serverless offline —> npm install serverless-offline -D
 

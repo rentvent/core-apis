@@ -18,6 +18,7 @@ provider:
   runtime: nodejs6.10
   stage: prod
   region: us-east-1
+  profile: rv_nonprod
   stackTags:
     AppName: ${self:service}
     Author: ${self:custom.author}
