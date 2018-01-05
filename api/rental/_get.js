@@ -8,7 +8,7 @@ export async function getrental(event, context, callback) {
     KeyConditionExpression: "rental_id = :r_id",
     
     ExpressionAttributeValues: {
-            ":r_id":parseInt(event.pathParameters.r_id,10)
+            ":r_id":event.pathParameters.r_id
           }    
   };
   try {
