@@ -39,17 +39,16 @@ provider:
 
 functions:
   getLandlord:
-    handler: api/landlord/_get.getlandlord
+    handler: api/landlord/_get.getlandlordByName
     events:
       - http:
-          path: ${self:custom.basePath}landlord/{first_name}/{last_name}
+          path: ${self:custom.basePath}landlord/{Fname}
           method: get
           cors: true
           request:
             parameters:
               paths:
-                first_name: true
-                last_name: true
+                Fname: true
 
   getProperty:
     handler: api/property/_get.getproperty
@@ -78,12 +77,13 @@ functions:
     handler: api/questionnaire/_get.getQuestionnaire
     events:
       - http:
-          path: ${self:custom.basePath}questionnaire/{search_by}/{search_val}
+          path: ${self:custom.basePath}question/{q_type}/{search_by}/{search_val}
           method: get
           cors: true
           request:
             parameters:
               paths:
+                q_type: true
                 search_by: true
                 search_val: true
   getComplaints:
@@ -113,6 +113,18 @@ functions:
           path: ${self:custom.basePath}tenant
           method: post
           cors: true
+
+  getAvgReview:
+    handler: api/landlord/_get.getlandlordReviews
+    events:
+      - http:
+          path: ${self:custom.basePath}landlord/avg/{landlord_id}
+          method: get
+          cors: true
+          request:
+            parameters:
+              paths:
+                landlord_id: true
         
 
   

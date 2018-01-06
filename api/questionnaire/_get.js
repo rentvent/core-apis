@@ -8,13 +8,14 @@ export async function getQuestionnaire (event,context,callback){
     search_val = parseInt(event.pathParameters.search_val)
    
   const params = { 
-    TableName: 'Questionnaire',
-    FilterExpression: "#searh_by = :search_val",
+    TableName: 'Question',
+    FilterExpression: "Q_Type = :q_type and #searh_by = :search_val",
     ExpressionAttributeNames: {
       "#searh_by": event.pathParameters.search_by,
     },
     ExpressionAttributeValues:{
-      ":search_val": search_val
+      ":search_val": search_val,
+      ":q_type": event.pathParameters.q_type,
     }
   };
 
