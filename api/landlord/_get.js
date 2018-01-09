@@ -13,22 +13,18 @@ export async function getlandlordByName(event, context, callback) {
   };
   try {
     const result = await dynamoDbLib.call("scan", params);
-    let count = 0;
-    for (let itemdata of result.Items) {
-
-      const L_ReviewsParams = {
-        TableName: 'Landlord_Reviews',
-        FilterExpression: "LP_L_ID = :l_ID",
-        ExpressionAttributeValues: {
-          ":l_ID": itemdata.L_ID
-        }
-      };
-
-      const LandlordReview = await dynamoDbLib.call("scan", L_ReviewsParams);
-      result.Items[count].Landlord_Reviews = LandlordReview.Items;
-      count++;
-    };
-    callback(null, success(result));
+    
+    var resultList=[] ;
+    for(let item of result.Items)
+    {
+      var object = {
+        L_ID: item.L_ID ,
+        L_Full_Name :item.L_Full_Name
+       }
+       resultList.push(object)
+    }
+  
+    callback(null, success(resultList));
   } catch (e) {
     callback(null, failure(e));
   }
