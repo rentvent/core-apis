@@ -42,7 +42,7 @@ functions:
     handler: api/landlord/_get.getlandlordByName
     events:
       - http:
-          path: ${self:custom.basePath}landlord/{Fname}
+          path: ${self:custom.basePath}landlord/search/{Fname}
           method: get
           cors: true
           request:
@@ -50,8 +50,8 @@ functions:
               paths:
                 Fname: true
 
-  getProperty:
-    handler: api/property/_get.getproperty
+  getPropertyById:
+    handler: api/property/_get.getpropertyById
     events:
       - http:
           path: ${self:custom.basePath}property/{p_id}
@@ -61,6 +61,18 @@ functions:
             parameters:
               paths:
                 p_id: true
+
+  getPropertyByAddress:
+    handler: api/property/_get.getpropertyByAdddress
+    events:
+      - http:
+          path: ${self:custom.basePath}property/address/{address}
+          method: get
+          cors: true
+          request:
+            parameters:
+              paths:
+                address: true
 
   getRental:
     handler: api/rental/_get.getrental
@@ -114,17 +126,17 @@ functions:
           method: post
           cors: true
 
-  getAvgReview:
-    handler: api/landlord/_get.getlandlordReviews
+  getlandlordInfo:
+    handler: api/landlord/_get.getlandlordInfo
     events:
       - http:
-          path: ${self:custom.basePath}landlord/avg/{landlord_id}
+          path: ${self:custom.basePath}landlord/{l_id}
           method: get
           cors: true
           request:
             parameters:
               paths:
-                landlord_id: true
+                l_id: true
         
 
   
