@@ -8,8 +8,10 @@ export async function createTenant(event, context, callback) {
     const params = {
         TableName: "Tenant",
         Item: {
-            T_ID :uuid.v1(),
+            T_ID :data.T_ID,
             T_Anonymous:data.Anonymous,
+            T_Email_ID : data.Email_ID,
+            T_Profile_Pic_URL : data.T_Profile_Pic_URL ,
             T_First_Name:data.FirstName,
             T_Last_Name : data.LastName,
             T_Phone:data.Phone,
@@ -28,7 +30,7 @@ export async function createTenant(event, context, callback) {
     };
     try {
         const result = await dynamoDbLib.call("put", params);
-        callback(null, success(result));
+        callback(null, success("success"));
     } catch (e) {
         callback(null, failure(e));
     }

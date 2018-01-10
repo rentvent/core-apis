@@ -8,7 +8,7 @@ export async function getpropertyById(event, context, callback) {
     KeyConditionExpression: "P_ID = :p_id",
     
     ExpressionAttributeValues: {
-            ":p_id":parseInt(event.pathParameters.p_id,10)
+            ":p_id":event.pathParameters.p_id
           }    
   };
   try {
