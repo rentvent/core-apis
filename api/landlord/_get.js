@@ -225,30 +225,53 @@ export async function getlandlordInfo(event, context, callback) {
 
 export async function getlandlordByaddress(event, context, callback) {
 
+
+  var search_val =decodeURI(event.pathParameters.address);
   const params = {
     TableName: 'rv_property',
     FilterExpression: "contains(P_Address_Line1,:address)",
     ExpressionAttributeValues: {
-      ":address": event.pathParameters.address
+      ":address": search_val
     }
   };
   try {
     const result = await dynamoDbLib.call("scan", params);
 
-    console.log(result);
+    var landlordResponseList = [] ;
     for (let item of result.Items) {
-      const params = {
+
+      const landlordparams = {
         TableName: 'rv_landlord',
-        FilterExpression: "",
+        FilterExpression: "contains(L_Properties, :L_Properties)",
         ExpressionAttributeValues: {
-          ":address": event.pathParameters.address
+          ":L_Properties": {
+             'p_id':parseInt(item.P_ID,10)
+          }
         }
+
       };
-
+      
+          
+      var landlord =await dynamoDbLib.call("scan", landlordparams);
+      var size = 0 ; 
+      if(landlord.Count > 0)
+      {
+        console.log("We have data", landlord);
+         while (landlord.Count > size)
+         {
+           
+           var landlordResponse = {
+             'L_ID' : landlord.Items[size].L_ID ,
+             'L_Full_Name': landlord.Items[size].L_Full_Name
+           }
+           landlordResponseList = landlordResponseList.concat(landlordResponse);
+           console.log(landlordResponseList)
+             size++;
+         }
+      }
+    
     }
-
-
-    callback(null, success(result));
+    callback(null, success(landlordResponseList));
   } catch (e) {
     callback(null, failure(e));
   }

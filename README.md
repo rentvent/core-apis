@@ -34,6 +34,8 @@ EndPoint :
   POST - https://srnezkfid4.execute-api.us-east-1.amazonaws.com/prod/Vent.Rent/questionnaire
   POST - https://srnezkfid4.execute-api.us-east-1.amazonaws.com/prod/Vent.Rent/tenant
   GET - https://srnezkfid4.execute-api.us-east-1.amazonaws.com/prod/Vent.Rent/landlord/{l_id}
+  GET - https://srnezkfid4.execute-api.us-east-1.amazonaws.com/prod/Vent.Rent/landlord/address/{address}
+
 
 
 Example of mocked data : 
@@ -41,3 +43,5 @@ Example of mocked data :
 https://srnezkfid4.execute-api.us-east-1.amazonaws.com/prod/Vent.Rent/landlord/00452ce4-f4de-11e7-95ef-83751e69d09d
 
 https://srnezkfid4.execute-api.us-east-1.amazonaws.com/prod/Vent.Rent/landlord/01b25f67-f5a7-11e7-bc5c-534144f03d11
+
+https://srnezkfid4.execute-api.us-east-1.amazonaws.com/prod/Vent.Rent/landlord/address/6716

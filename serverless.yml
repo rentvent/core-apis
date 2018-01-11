@@ -137,6 +137,18 @@ functions:
             parameters:
               paths:
                 l_id: true
+
+  getLandlordbyAddress:
+    handler: api/landlord/_get.getlandlordByaddress
+    events:
+      - http:
+          path: ${self:custom.basePath}landlord/address/{address}
+          method: get
+          cors: true
+          request:
+            parameters:
+              paths:
+                address: true
         
 
   
