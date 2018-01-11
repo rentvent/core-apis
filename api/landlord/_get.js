@@ -139,7 +139,7 @@ export async function getlandlordInfo(event, context, callback) {
     console.log("done from reviews");
 
 
-    var L_Properties = [];
+    var L_Properties = [];   var L_Complaints = [];
     //If this landlord has property 
     console.log(result.Items[0].L_Properties);
     var propertysize = result.Items[0].L_Properties.length;
@@ -163,7 +163,56 @@ export async function getlandlordInfo(event, context, callback) {
         // do we have data for this properties ? ? 
         if (properties.Count > 0) {
 
-          // get property review param from table
+
+            // get complains by address
+
+            //split the address line 2 in order to get result in complains
+
+            var stringArray = properties.Items[0].P_Address_Line1.split(/(\s+)/);
+
+            // i start from 2 as the first two sluts is the zip code and space
+            var size = 2 ; var p_address_search ;
+            while(stringArray.length > size != ' ')
+            {
+                 if(stringArray[size] != '')
+                 {
+                     p_address_search = stringArray[size] ;
+                     console.log("p_address_search",p_address_search);
+                     break ;
+                 }
+                 size++ ;
+            }
+            var complainsParam = {
+                TableName: 'Complaints',
+                FilterExpression: "contains(C_Address_Line_1, :p_address)",
+                ExpressionAttributeValues: {
+                    ":p_address": p_address_search
+                }
+            };
+
+            console.log("get complains by address begin", properties.Items[0].P_Address_Line1 );
+
+            var complains =  await dynamoDbLib.call("scan", complainsParam);
+
+            console.log("complains result " ,complains);
+
+            if(complains.Count> 0)
+            {
+                console.log("we have complains for this property ");
+                for (let comp of complains.Items )
+                {
+                    //build the object
+                    var complainObj = {
+                        'C_ID' : comp.C_ID
+                    };
+                    L_Complaints.push(complainObj);
+                }
+
+
+                console.log("L_Complaints",L_Complaints);
+            }
+
+            // get property review param from table
           var PropertiesReviewParams = {
             TableName: 'Property_Reviews',
             FilterExpression: "P_ID = :p_id",
@@ -210,7 +259,7 @@ export async function getlandlordInfo(event, context, callback) {
         }
       }
       result.Items[0].L_Properties = propertysize > 0 ? L_Properties : [];
-
+      result.Items[0].L_Complaints = propertysize > 0  ? L_Complaints : [];
 
       //console.log(result);
     }
