@@ -77,7 +77,7 @@ export async function getlandlordInfo(event, context, callback) {
 
       for (let item of Review.Items) {
 
-        console.log("compute step2 ",item);
+        console.log("compute step2 ", item);
         //het the value of each reviw 
         l_recommended = item.LR_Recommend;
         l_approval = item.LR_Approval;
@@ -85,16 +85,16 @@ export async function getlandlordInfo(event, context, callback) {
         //Convert the value of YES OR NO
         l_recommended = l_recommended == 'yes' ? 1 : 0;
         l_approval = l_approval == 'yes' ? 1 : 0;
-        console.log("compute step3 ",l_recommended);
+        console.log("compute step3 ", l_recommended);
         //YES oR NO
         L_Approval_Rate = L_Approval_Rate + l_approval;
         L_Recommended_Rate = L_Recommended_Rate + l_recommended;
-        console.log("compute step4 ",L_Approval_Rate);
+        console.log("compute step4 ", L_Approval_Rate);
         //Computation 
         L_Response_Rate = L_Response_Rate + item.LR_Responsiveness;
         L_Avg_Rating = L_Avg_Rating + item.LR_Rating;
         LR_Repair_Requests = LR_Repair_Requests + item.LR_Repair_Requests;
-        console.log("compute step5 ",L_Avg_Rating);
+        console.log("compute step5 ", L_Avg_Rating);
 
         // in order to get the city and state 
         var Tenant;
@@ -143,9 +143,9 @@ export async function getlandlordInfo(event, context, callback) {
     //If this landlord has property 
     console.log(result.Items[0].L_Properties);
     var propertysize = result.Items[0].L_Properties.length;
-    if ( propertysize > 0) {
+    if (propertysize > 0) {
       console.log("inside the loop");
-      
+
       for (let prop of result.Items[0].L_Properties) {
 
         var L_PropertiesParams = {
@@ -162,7 +162,7 @@ export async function getlandlordInfo(event, context, callback) {
 
         // do we have data for this properties ? ? 
         if (properties.Count > 0) {
-          
+
           // get property review param from table
           var PropertiesReviewParams = {
             TableName: 'Property_Reviews',
@@ -174,15 +174,14 @@ export async function getlandlordInfo(event, context, callback) {
           console.log("we have data propertiesReview ");
 
           var propertiesReview = await dynamoDbLib.call("scan", PropertiesReviewParams);
-         
+
           var sum_prop_avg = 0
-          if (propertiesReview.Count > 0 ) {
-            console.log("we have data  propertiesReview",propertiesReview.Items);
+          if (propertiesReview.Count > 0) {
+            console.log("we have data  propertiesReview", propertiesReview.Items);
 
             //compute the avg rating for property 
-           var p_review_count = 0;
-           while(propertiesReview.Count >p_review_count )
-            {
+            var p_review_count = 0;
+            while (propertiesReview.Count > p_review_count) {
               console.log("inside loop", propertiesReview.Items);
               sum_prop_avg = propertiesReview.Items[p_review_count].LR_Rating + sum_prop_avg;
               p_review_count++;
@@ -201,13 +200,13 @@ export async function getlandlordInfo(event, context, callback) {
             'P_City': properties.Items[0].P_City,
             'P_Zipcode': properties.Items[0].P_Zipcode,
             'P_State': properties.Items[0].P_State,
-            'PR_Rating': propertiesReview.Count> 0  ?  sum_prop_avg / propertiesReview.Count : 0 ,
-            'PR_Count': propertiesReview.Count> 0 ?  propertiesReview.Count  : 0
+            'PR_Rating': propertiesReview.Count > 0 ? sum_prop_avg / propertiesReview.Count : 0,
+            'PR_Count': propertiesReview.Count > 0 ? propertiesReview.Count : 0
           };
           console.log("propResponse", propResponse);
 
           L_Properties = L_Properties.concat(propResponse);
-         
+
         }
       }
       result.Items[0].L_Properties = propertysize > 0 ? L_Properties : [];
@@ -215,7 +214,7 @@ export async function getlandlordInfo(event, context, callback) {
 
       //console.log(result);
     }
- 
+
     callback(null, success(result));
   } catch (e) {
     callback(null, failure(e));
@@ -225,19 +224,21 @@ export async function getlandlordInfo(event, context, callback) {
 
 export async function getlandlordByaddress(event, context, callback) {
 
+    var search_val =decodeURI(event.pathParameters.address);
 
-  var search_val =decodeURI(event.pathParameters.address);
+
   const params = {
     TableName: 'rv_property',
     FilterExpression: "contains(P_Address_Line1,:address)",
     ExpressionAttributeValues: {
-      ":address": search_val
-    }
+      ":address": search_val.toUpperCase()
+  }
   };
+
   try {
     const result = await dynamoDbLib.call("scan", params);
 
-    var landlordResponseList = [] ;
+    var landlordResponseList = [];
     for (let item of result.Items) {
 
       const landlordparams = {
@@ -245,31 +246,28 @@ export async function getlandlordByaddress(event, context, callback) {
         FilterExpression: "contains(L_Properties, :L_Properties)",
         ExpressionAttributeValues: {
           ":L_Properties": {
-             'p_id':parseInt(item.P_ID,10)
+            'p_id': parseInt(item.P_ID, 10)
           }
         }
-
       };
-      
-          
-      var landlord =await dynamoDbLib.call("scan", landlordparams);
-      var size = 0 ; 
-      if(landlord.Count > 0)
-      {
+
+
+      var landlord = await dynamoDbLib.call("scan", landlordparams);
+      var size = 0;
+      if (landlord.Count > 0) {
         console.log("We have data", landlord);
-         while (landlord.Count > size)
-         {
-           
-           var landlordResponse = {
-             'L_ID' : landlord.Items[size].L_ID ,
-             'L_Full_Name': landlord.Items[size].L_Full_Name
-           }
-           landlordResponseList = landlordResponseList.concat(landlordResponse);
-           console.log(landlordResponseList)
-             size++;
-         }
+        while (landlord.Count > size) {
+
+          var landlordResponse = {
+            'L_ID': landlord.Items[size].L_ID,
+            'L_Full_Name': landlord.Items[size].L_Full_Name
+          }
+          landlordResponseList = landlordResponseList.concat(landlordResponse);
+          console.log(landlordResponseList)
+          size++;
+        }
       }
-    
+
     }
     callback(null, success(landlordResponseList));
   } catch (e) {

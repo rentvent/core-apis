@@ -25,7 +25,7 @@ sls remove
 
 EndPoint : 
 
- GET - https://srnezkfid4.execute-api.us-east-1.amazonaws.com/prod/Vent.Rent/landlord/search/{Fname}
+  GET - https://srnezkfid4.execute-api.us-east-1.amazonaws.com/prod/Vent.Rent/landlord/search/{Fname}
   GET - https://srnezkfid4.execute-api.us-east-1.amazonaws.com/prod/Vent.Rent/property/{p_id}
   GET - https://srnezkfid4.execute-api.us-east-1.amazonaws.com/prod/Vent.Rent/property/address/{address}
   GET - https://srnezkfid4.execute-api.us-east-1.amazonaws.com/prod/Vent.Rent/rental/{r_id}
@@ -35,6 +35,7 @@ EndPoint :
   POST - https://srnezkfid4.execute-api.us-east-1.amazonaws.com/prod/Vent.Rent/tenant
   GET - https://srnezkfid4.execute-api.us-east-1.amazonaws.com/prod/Vent.Rent/landlord/{l_id}
   GET - https://srnezkfid4.execute-api.us-east-1.amazonaws.com/prod/Vent.Rent/landlord/address/{address}
+
 
 
 
