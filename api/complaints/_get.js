@@ -7,7 +7,7 @@ export async function getComplaints (event,context,callback){
     TableName: 'Complaints',
     KeyConditionExpression: "C_ID = :c_id",
     ExpressionAttributeValues:{
-      ":c_id":parseInt(event.pathParameters.c_id,10)
+      ":c_id":event.pathParameters.c_id
     }
   };
 

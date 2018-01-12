@@ -273,14 +273,14 @@ export async function getlandlordInfo(event, context, callback) {
 
 export async function getlandlordByaddress(event, context, callback) {
 
-    var search_val =decodeURI(event.pathParameters.address);
+    var search_val =decodeURI(event.pathParameters.address).toUpperCase();
 
-
+   console.log("step one " ,search_val);
   const params = {
     TableName: 'rv_property',
-    FilterExpression: "contains(P_Address_Line1,:address)",
+    FilterExpression: "contains(P_Address_Line1, :address) OR P_Address_Line1 = :address ",
     ExpressionAttributeValues: {
-      ":address": search_val.toUpperCase()
+      ":address": search_val
   }
   };
 
@@ -288,6 +288,10 @@ export async function getlandlordByaddress(event, context, callback) {
     const result = await dynamoDbLib.call("scan", params);
 
     var landlordResponseList = [];
+
+    console.log("step two " ,result);
+
+
     for (let item of result.Items) {
 
       const landlordparams = {
@@ -302,7 +306,10 @@ export async function getlandlordByaddress(event, context, callback) {
 
 
       var landlord = await dynamoDbLib.call("scan", landlordparams);
+
+        console.log("step 3 " ,landlord);
       var size = 0;
+
       if (landlord.Count > 0) {
         console.log("We have data", landlord);
         while (landlord.Count > size) {
