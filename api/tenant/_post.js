@@ -4,7 +4,13 @@ import uuid from "uuid";
 
 export async function createTenant(event, context, callback) {
 
-    const data = JSON.parse(event.body);
+
+    let data = JSON.parse(event.body, function (key, value) {
+        return (value == "") ? " " : value
+    });
+
+   // console.log(data);
+
     var result;
     var ID = uuid.v1();
     console.log(data.T_ID);
@@ -21,7 +27,6 @@ export async function createTenant(event, context, callback) {
         Item: {
             T_ID: ID,
             T_Anonymous: data.Anonymous,
-            T_Email_ID: data.Email_ID,
             T_Profile_Pic_URL: data.T_Profile_Pic_URL,
             T_First_Name: data.FirstName,
             T_Last_Name: data.LastName,

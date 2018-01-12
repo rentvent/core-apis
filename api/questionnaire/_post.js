@@ -4,8 +4,10 @@ import uuid from "uuid";
 import format from "date-format";
 
 export async function submiteQuestionnaire(event, context, callback) {
-
-    const data = JSON.parse(event.body);
+    
+    let data = JSON.parse(event.body, function (key, value) {
+        return (value == "") ? " " : value
+    });
 
     var landlordReviewParam = {
         TableName: "Landlord_Reviews",
