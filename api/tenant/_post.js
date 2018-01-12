@@ -27,6 +27,7 @@ export async function createTenant(event, context, callback) {
         Item: {
             T_ID: ID,
             T_Anonymous: data.Anonymous,
+            T_Email_ID: data.Email_ID,
             T_Profile_Pic_URL: data.T_Profile_Pic_URL,
             T_First_Name: data.FirstName,
             T_Last_Name: data.LastName,
