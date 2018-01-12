@@ -46,7 +46,7 @@ export async function createTenant(event, context, callback) {
         }
     };
     try {
-        if (data.T_ID != null) {
+        if (data.T_ID != null && data.T_ID  != " ") {
 
             ID = data.T_ID;
             const validateresult = await dynamoDbLib.call("scan", validateparams);
