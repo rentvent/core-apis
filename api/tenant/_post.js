@@ -8,11 +8,10 @@ export async function createTenant(event, context, callback) {
     let data = JSON.parse(event.body, function (key, value) {
         return (value == "") ? " " : value
     });
-
    // console.log(data);
 
     var result;
-    var ID = uuid.v1();
+
     console.log(data.T_ID);
     const validateparams = {
         TableName: 'Tenant',
@@ -25,9 +24,8 @@ export async function createTenant(event, context, callback) {
     const params = {
         TableName: "Tenant",
         Item: {
-            T_ID: ID,
+            T_ID: data.T_ID,
             T_Anonymous: data.Anonymous,
-            T_Email_ID: data.Email_ID,
             T_Profile_Pic_URL: data.T_Profile_Pic_URL,
             T_First_Name: data.FirstName,
             T_Last_Name: data.LastName,
@@ -46,31 +44,22 @@ export async function createTenant(event, context, callback) {
         }
     };
     try {
-        if (data.T_ID != null && data.T_ID  != " ") {
 
-            ID = data.T_ID;
-            const validateresult = await dynamoDbLib.call("scan", validateparams);
-            console.log(validateresult);
-            if (validateresult.Count == 1 ) {
-                console.log("exsit")
-                result = validateresult.Items[0].T_ID;
-                callback(null, success(result));
-            }
-            else
-            {   
-                console.log("NOT found");
-                result = await dynamoDbLib.call("put", params);
-                callback(null, success(ID));
-            }
-           
+        const validateresult = await dynamoDbLib.call("scan", validateparams);
+        console.log(validateresult);
+        if (validateresult.Count == 1 ) {
+            console.log("exsit")
+            result = validateresult.Items[0].T_ID;
+            callback(null, success(result));
         }
-        else {
+
+        else
+        {
             console.log("Add");
             result = await dynamoDbLib.call("put", params);
-            callback(null, success(ID));
+            callback(null, success(data.T_ID));
         }
 
-        callback(null, success(result));
     } catch (e) {
         callback(null, failure(e));
     }
