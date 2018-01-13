@@ -25,16 +25,18 @@ sls remove
 
 EndPoint : 
 
-  GET - https://srnezkfid4.execute-api.us-east-1.amazonaws.com/prod/Vent.Rent/landlord/search/{Fname}
-  GET - https://srnezkfid4.execute-api.us-east-1.amazonaws.com/prod/Vent.Rent/property/{p_id}
-  GET - https://srnezkfid4.execute-api.us-east-1.amazonaws.com/prod/Vent.Rent/property/address/{address}
-  GET - https://srnezkfid4.execute-api.us-east-1.amazonaws.com/prod/Vent.Rent/rental/{r_id}
-  GET - https://srnezkfid4.execute-api.us-east-1.amazonaws.com/prod/Vent.Rent/question/{q_type}/{search_by}/{search_val}
-  GET - https://srnezkfid4.execute-api.us-east-1.amazonaws.com/prod/Vent.Rent/Complaints/{c_id}
-  POST - https://srnezkfid4.execute-api.us-east-1.amazonaws.com/prod/Vent.Rent/questionnaire
-  POST - https://srnezkfid4.execute-api.us-east-1.amazonaws.com/prod/Vent.Rent/tenant
-  GET - https://srnezkfid4.execute-api.us-east-1.amazonaws.com/prod/Vent.Rent/landlord/{l_id}
-  GET - https://srnezkfid4.execute-api.us-east-1.amazonaws.com/prod/Vent.Rent/landlord/address/{address}
+   GET - https://ykfhhoo131.execute-api.us-east-1.amazonaws.com/prod/Vent.Rent/landlord/search/{Fname}
+   GET - https://ykfhhoo131.execute-api.us-east-1.amazonaws.com/prod/Vent.Rent/property/{p_id}
+   GET - https://ykfhhoo131.execute-api.us-east-1.amazonaws.com/prod/Vent.Rent/rental/{r_id}
+   GET - https://ykfhhoo131.execute-api.us-east-1.amazonaws.com/prod/Vent.Rent/question/{q_type}/{search_by}/{search_val}
+   GET - https://ykfhhoo131.execute-api.us-east-1.amazonaws.com/prod/Vent.Rent/Complaints/{c_id}
+   POST - https://ykfhhoo131.execute-api.us-east-1.amazonaws.com/prod/Vent.Rent/questionnaire
+   POST - https://ykfhhoo131.execute-api.us-east-1.amazonaws.com/prod/Vent.Rent/tenant
+   GET - https://ykfhhoo131.execute-api.us-east-1.amazonaws.com/prod/Vent.Rent/landlord/{l_id}
+   GET - https://ykfhhoo131.execute-api.us-east-1.amazonaws.com/prod/Vent.Rent/landlord/address/{p_id}
+   GET - https://ykfhhoo131.execute-api.us-east-1.amazonaws.com/prod/Vent.Rent/property/address/{p_address}
+
+
 
 
 
