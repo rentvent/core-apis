@@ -61,19 +61,6 @@ functions:
             parameters:
               paths:
                 p_id: true
-
-  getPropertyByAddress:
-    handler: api/property/_get.getpropertyByAdddress
-    events:
-      - http:
-          path: ${self:custom.basePath}property/address/{address}
-          method: get
-          cors: true
-          request:
-            parameters:
-              paths:
-                address: true
-
   getRental:
     handler: api/rental/_get.getrental
     events:
@@ -138,20 +125,29 @@ functions:
               paths:
                 l_id: true
 
-  getLandlordbyAddress:
-    handler: api/landlord/_get.getlandlordByaddress
+  getLandlordbyProperty:
+    handler: api/landlord/_get.getlandlordByProperty
     events:
       - http:
-          path: ${self:custom.basePath}landlord/address/{address}
+          path: ${self:custom.basePath}landlord/address/{p_id}
           method: get
           cors: true
           request:
             parameters:
               paths:
-                address: true
-        
+                p_id: true
 
-  
+  getPropertyByAddress:
+      handler: api/property/_get.getpropertyByAdddressRDS
+      events:
+        - http:
+            path: ${self:custom.basePath}property/address/{p_address}
+            method: get
+            cors: true
+            request:
+              parameters:
+                paths:
+                  p_address: true
                
                
 

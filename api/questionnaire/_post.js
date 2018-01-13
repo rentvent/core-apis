@@ -41,8 +41,8 @@ export async function submiteQuestionnaire(event, context, callback) {
         Item: {
             rental_id: uuid.v1(),
             R_Price: data.Q_Rental_Rate,
-            //R_Start_Date: data.P_Q_Movein_Date,
-            //R_End_Date: data.P_Q_Moveout_Date,
+            R_Start_Date :data.P_Q_Movein_Date,
+            R_End_Date :data.P_Q_Moveout_Dat,
             R_Tenants: data.tenant_id,
             R_Deposit_Required: data.P_Q_Security_Required,
             R_Annual_Increase: data.P_Q_RR_Increase,

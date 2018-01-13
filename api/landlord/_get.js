@@ -1,5 +1,17 @@
 import * as dynamoDbLib from "../../libs/dynamodb-lib";
 import { success, failure } from "../../libs/response-lib";
+var mysql = require('mysql');
+
+var connection = mysql.createConnection({
+    host     : 'rentvent.cue7vrfncc1o.us-east-1.rds.amazonaws.com',
+    user     : 'rentvent',
+    password : 'rentvent',
+    database: 'rentvent'
+});
+
+
+console.log("Connecting to MySQL...");
+connection.connect();
 
 export async function getlandlordByName(event, context, callback) {
 
@@ -270,65 +282,31 @@ export async function getlandlordInfo(event, context, callback) {
   }
 }
 
+export async function getlandlordByProperty(event, context, callback) {
 
-export async function getlandlordByaddress(event, context, callback) {
+    const p_id =event.pathParameters.p_id;
+    var  resultlist = []; var i = 0 ;
+    try {
+        connection.query("SELECT * FROM Landlord where L_Properties like '%p_id : "+p_id+"%' ",
+            function (err, rows) {
+            console.log(rows[0].P_ID);
+                while (i < rows.length) {
+                    resultlist.push(
+                        {
+                            'L_ID': rows[i].L_ID,
+                            'L_Full_Name': rows[i].L_Full_Name
 
-    var search_val =decodeURI(event.pathParameters.address).toUpperCase();
-
-   console.log("step one " ,search_val);
-  const params = {
-    TableName: 'rv_property',
-    FilterExpression: "contains(P_Address_Line1, :address) OR P_Address_Line1 = :address ",
-    ExpressionAttributeValues: {
-      ":address": search_val
-  }
-  };
-
-  try {
-    const result = await dynamoDbLib.call("scan", params);
-
-    var landlordResponseList = [];
-
-    console.log("step two " ,result);
-
-
-    for (let item of result.Items) {
-
-      const landlordparams = {
-        TableName: 'rv_landlord',
-        FilterExpression: "contains(L_Properties, :L_Properties)",
-        ExpressionAttributeValues: {
-          ":L_Properties": {
-            'p_id': parseInt(item.P_ID, 10)
-          }
-        }
-      };
-
-
-      var landlord = await dynamoDbLib.call("scan", landlordparams);
-
-        console.log("step 3 " ,landlord);
-      var size = 0;
-
-      if (landlord.Count > 0) {
-        console.log("We have data", landlord);
-        while (landlord.Count > size) {
-
-          var landlordResponse = {
-            'L_ID': landlord.Items[size].L_ID,
-            'L_Full_Name': landlord.Items[size].L_Full_Name
-          }
-          landlordResponseList = landlordResponseList.concat(landlordResponse);
-          console.log(landlordResponseList)
-          size++;
-        }
-      }
-
+                        });
+                    i++;
+                }
+                callback(null, success(resultlist));
+            });
     }
-    callback(null, success(landlordResponseList));
-  } catch (e) {
-    callback(null, failure(e));
-  }
+
+    catch (e) {
+        callback(null, failure(e));
+    }
 
 
 }
+
