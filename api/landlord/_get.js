@@ -2,6 +2,7 @@ import * as dynamoDbLib from "../../libs/dynamodb-lib";
 import { success, failure } from "../../libs/response-lib";
 var mysql = require('mysql');
 
+
 var connection = mysql.createConnection({
     host     : 'rentvent.cue7vrfncc1o.us-east-1.rds.amazonaws.com',
     user     : 'rentvent',
@@ -9,9 +10,6 @@ var connection = mysql.createConnection({
     database: 'rentvent'
 });
 
-
-console.log("Connecting to MySQL...");
-connection.connect();
 
 export async function getlandlordByName(event, context, callback) {
 
@@ -175,34 +173,35 @@ export async function getlandlordInfo(event, context, callback) {
         // do we have data for this properties ? ? 
         if (properties.Count > 0) {
 
-
+            // var p_address_search = properties.Items[0].P_Address_Line1;
             // get complains by address
 
             //split the address line 2 in order to get result in complains
 
             var stringArray = properties.Items[0].P_Address_Line1.split(/(\s+)/);
-
             // i start from 2 as the first two sluts is the zip code and space
-            var size = 2 ; var p_address_search ;
-            while(stringArray.length > size != ' ')
-            {
-                 if(stringArray[size] != '')
-                 {
-                     p_address_search = stringArray[size] ;
-                     console.log("p_address_search",p_address_search);
-                     break ;
-                 }
-                 size++ ;
+            var size = 2;
+            var p_address_search;
+            while (stringArray.length > size) {
+                if (stringArray[size] != '') {
+
+                    p_address_search = stringArray[size];
+                    console.log("p_address_search", p_address_search);
+                    break;
+                }
+                size++;
             }
             var complainsParam = {
                 TableName: 'Complaints',
                 FilterExpression: "contains(C_Address_Line_1, :p_address)",
                 ExpressionAttributeValues: {
                     ":p_address": p_address_search
-                }
+                },
+                limit :10000
             };
 
-            console.log("get complains by address begin", properties.Items[0].P_Address_Line1 );
+
+            console.log("get complains by address begin", p_address_search);
 
             var complains =  await dynamoDbLib.call("scan", complainsParam);
 
@@ -222,6 +221,35 @@ export async function getlandlordInfo(event, context, callback) {
 
 
                 console.log("L_Complaints",L_Complaints);
+            }
+            else
+            {
+                var complainsParam2 = {
+                    TableName: 'Complaints',
+                    FilterExpression: "P_ID = :p_id",
+                    ExpressionAttributeValues: {
+                        ":p_id":  properties.Items[0].P_ID
+                    }
+                };
+
+                var complains =  await dynamoDbLib.call("scan", complainsParam2);
+
+
+                if(complains.Count> 0)
+                {
+                    console.log("we have complains for this property ");
+                    for (let comp of complains.Items )
+                    {
+                        //build the object
+                        var complainObj = {
+                            'C_ID' : comp.C_ID
+                        };
+                        L_Complaints.push(complainObj);
+                    }
+
+
+                    console.log("L_Complaints",L_Complaints);
+                }
             }
 
             // get property review param from table
@@ -282,31 +310,96 @@ export async function getlandlordInfo(event, context, callback) {
   }
 }
 
-export async function getlandlordByProperty(event, context, callback) {
+export async function getlandlordByPropertyRDS(event, context, callback) {
 
-    const p_id =event.pathParameters.p_id;
-    var  resultlist = []; var i = 0 ;
-    try {
-        connection.query("SELECT * FROM Landlord where L_Properties like '%p_id : "+p_id+"%' ",
-            function (err, rows) {
-            console.log(rows[0].P_ID);
-                while (i < rows.length) {
-                    resultlist.push(
-                        {
-                            'L_ID': rows[i].L_ID,
-                            'L_Full_Name': rows[i].L_Full_Name
+    context.callbackWaitsForEmptyEventLoop = false;
+    connection.getConnection(function (err, connection) {
+        if (err) {
+            callback(err);
+        }
+        else {
+            var resultlist = [];
+            var i = 0;
 
-                        });
-                    i++;
-                }
-                callback(null, success(resultlist));
-            });
-    }
+            var p_id = event["pathParameters"]["p_id"];
+           // var p_id = '2005009003';
+            try {
+                connection.query("SELECT * FROM Landlord where L_Properties like '%p_id : " + p_id + "%' ",
+                    function (err, rows) {
+                        if (err != null)
+                            callback(null, err);
+                        while (i < rows.length) {
+                            resultlist.push(
+                                {
+                                    'L_ID': rows[i].L_ID,
+                                    'L_Full_Name': rows[i].L_Full_Name
 
-    catch (e) {
-        callback(null, failure(e));
-    }
+                                });
+                            i++;
+                        }
 
+                        console.log(resultlist);
+
+                        var responseBody = {
+                            resultlist
+                        };
+
+                        var response = {
+                            "statusCode": 200,
+                            "headers": {
+                                "my_header": "my_value"
+                            },
+                            "body": JSON.stringify(responseBody),
+                            "isBase64Encoded": false
+                        };
+                        callback(null, response);
+
+
+                    });
+            }
+            catch (e) {
+                callback(null, e);
+            }
+
+        }
+    });
 
 }
 
+export async function getlandlordByPropertydaynamo(event, context, callback) {
+
+    const p_id =event.pathParameters.p_id;
+    const params = {
+        TableName: 'rv_landlord',
+        FilterExpression: "contains(L_Properties, :L_Properties)",
+        ExpressionAttributeValues: {
+            ":L_Properties": {'p_id': parseInt(p_id, 10)}
+        }
+    };
+
+    try {
+        var landlord = await dynamoDbLib.call("scan", params);
+
+        console.log(landlord);
+        var size = 0 ; var landlordResponseList =[];
+        if (landlord.Count > 0) {
+            console.log("We have data", landlord);
+            while (landlord.Count > size) {
+
+                var landlordResponse = {
+                    'L_ID': landlord.Items[size].L_ID,
+                    'L_Full_Name': landlord.Items[size].L_Full_Name
+                }
+                landlordResponseList = landlordResponseList.concat(landlordResponse);
+                console.log(landlordResponseList)
+                size++;
+            }
+
+        };
+
+        callback(null, success(landlordResponseList));
+    } catch (e) {
+        callback(null, failure(e));
+    }
+
+}

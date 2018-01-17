@@ -24,27 +24,13 @@ sls remove
 
 
 EndPoint : 
+  GET - https://2rej90wsdi.execute-api.us-east-1.amazonaws.com/prod/Vent.Rent/landlord/search/{Fname}
+  GET - https://2rej90wsdi.execute-api.us-east-1.amazonaws.com/prod/Vent.Rent/property/{p_id}
+  GET - https://2rej90wsdi.execute-api.us-east-1.amazonaws.com/prod/Vent.Rent/rental/{r_id}
+  GET - https://2rej90wsdi.execute-api.us-east-1.amazonaws.com/prod/Vent.Rent/question/{q_type}/{search_by}/{search_val}
+  GET - https://2rej90wsdi.execute-api.us-east-1.amazonaws.com/prod/Vent.Rent/Complaints/{c_id}
+  POST - https://2rej90wsdi.execute-api.us-east-1.amazonaws.com/prod/Vent.Rent/questionnaire
+  POST - https://2rej90wsdi.execute-api.us-east-1.amazonaws.com/prod/Vent.Rent/tenant
+  GET - https://2rej90wsdi.execute-api.us-east-1.amazonaws.com/prod/Vent.Rent/property/address/{p_address}
+  GET - https://2rej90wsdi.execute-api.us-east-1.amazonaws.com/prod/Vent.Rent/landlord/property/{p_id}
 
-   GET - https://ykfhhoo131.execute-api.us-east-1.amazonaws.com/prod/Vent.Rent/landlord/search/{Fname}
-   GET - https://ykfhhoo131.execute-api.us-east-1.amazonaws.com/prod/Vent.Rent/property/{p_id}
-   GET - https://ykfhhoo131.execute-api.us-east-1.amazonaws.com/prod/Vent.Rent/rental/{r_id}
-   GET - https://ykfhhoo131.execute-api.us-east-1.amazonaws.com/prod/Vent.Rent/question/{q_type}/{search_by}/{search_val}
-   GET - https://ykfhhoo131.execute-api.us-east-1.amazonaws.com/prod/Vent.Rent/Complaints/{c_id}
-   POST - https://ykfhhoo131.execute-api.us-east-1.amazonaws.com/prod/Vent.Rent/questionnaire
-   POST - https://ykfhhoo131.execute-api.us-east-1.amazonaws.com/prod/Vent.Rent/tenant
-   GET - https://ykfhhoo131.execute-api.us-east-1.amazonaws.com/prod/Vent.Rent/landlord/{l_id}
-   GET - https://ykfhhoo131.execute-api.us-east-1.amazonaws.com/prod/Vent.Rent/landlord/address/{p_id}
-   GET - https://ykfhhoo131.execute-api.us-east-1.amazonaws.com/prod/Vent.Rent/property/address/{p_address}
-
-
-
-
-
-
-Example of mocked data : 
-
-https://srnezkfid4.execute-api.us-east-1.amazonaws.com/prod/Vent.Rent/landlord/00452ce4-f4de-11e7-95ef-83751e69d09d
-
-https://srnezkfid4.execute-api.us-east-1.amazonaws.com/prod/Vent.Rent/landlord/01b25f67-f5a7-11e7-bc5c-534144f03d11
-
-https://srnezkfid4.execute-api.us-east-1.amazonaws.com/prod/Vent.Rent/landlord/address/6716
