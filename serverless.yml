@@ -7,15 +7,15 @@ plugins:
   
 # Enable auto-packing of external modules
 custom:
-  lambdaExecSecurityGroup: sg-d3945ca7
-  SUBNET_ID_A: subnet-dcc36df3
-  SUBNET_ID_B: subnet-7cd07321
-  SUBNET_ID_C: subnet-2ab9ab26
+  lambdaExecSecurityGroup:  sg-d3945ca7
+  SUBNET_ID_A: subnet-7cd07321
+  SUBNET_ID_B: subnet-47295923
+  SUBNET_ID_C: subnet-dcc36df3
   webpackIncludeModules: true
   basePath: Vent.Rent/
   stage: ${opt:stage, self:provider.stage}
   namespace: ${self:service}-${self:custom.stage}
-  VPC_ID: vpc-bec3bec6
+
 
 provider:
   name: aws
@@ -61,36 +61,43 @@ provider:
       Resource: "*"
 
 
-resources:
-  Resources:
-    ServerlessSecurityGroup:
-      Type: AWS::EC2::SecurityGroup
-      Properties:
-        GroupDescription: SecurityGroup for Serverless Functions
-        VpcId: ${self:custom.VPC_ID}
-    RDSSecurityGroup:
-      Type: AWS::EC2::SecurityGroup
-      Properties:
-        GroupDescription: Ingress for RDS Instance
-        VpcId: ${self:custom.VPC_ID}
-        SecurityGroupIngress:
-        - IpProtocol: tcp
-          FromPort: '5432'
-          ToPort: '5432'
-          SourceSecurityGroupId:
-            Ref: ServerlessSecurityGroup
-    RDSSubnetGroup:
-      Type: AWS::RDS::DBSubnetGroup
-      Properties:
-        DBSubnetGroupDescription: RDS Subnet Group
-        SubnetIds:
+#resources:
+#  Resources:
+#    ServerlessSecurityGroup:
+#      Type: AWS::EC2::SecurityGroup
+#      Properties:
+#        GroupDescription: SecurityGroup for Serverless Functions
+#        VpcId: ${self:custom.VPC_ID}
+#    RDSSecurityGroup:
+#      Type: AWS::EC2::SecurityGroup
+#      Properties:
+#        GroupDescription: Ingress for RDS Instance
+#        VpcId: ${self:custom.VPC_ID}
+#        SecurityGroupIngress:
+#        - IpProtocol: tcp
+#          FromPort: '5432'
+#          ToPort: '5432'
+#          SourceSecurityGroupId:
+#            Ref: ServerlessSecurityGroup
+#    RDSSubnetGroup:
+#      Type: AWS::RDS::DBSubnetGroup
+#      Properties:
+#        DBSubnetGroupDescription: RDS Subnet Group
+#        SubnetIds:
+#          - ${self:custom.SUBNET_ID_A}
+#          - ${self:custom.SUBNET_ID_B}
+#          - ${self:custom.SUBNET_ID_C}
+
+functions:
+  getLandlordByName:
+    handler: api/landlord/rds/_get.getlandlordByNameRDS
+    vpc:
+       securityGroupIds:
+          - ${self:custom.lambdaExecSecurityGroup}
+       subnetIds:
           - ${self:custom.SUBNET_ID_A}
           - ${self:custom.SUBNET_ID_B}
           - ${self:custom.SUBNET_ID_C}
-
-functions:
-  getLandlord:
-    handler: api/landlord/rds/_get.getlandlordByNameRDS
     events:
       - http:
           path: ${self:custom.basePath}landlord/search/{Fname}
@@ -100,13 +107,6 @@ functions:
             parameters:
               paths:
                 Fname: true
-    vpc:
-        securityGroupIds:
-         - sg-d3945ca7
-        subnetIds:
-         - subnet-dcc36df3
-         - subnet-7cd07321
-         - subnet-2ab9ab26
 
   getLandlordDetailes:
     handler: api/landlord/dynamo/_get.getlandlordInfo
@@ -156,6 +156,13 @@ functions:
                 search_val: true
   getComplaints:
     handler: api/complaints/rds/_get.getComplaintsRDS
+    vpc:
+       securityGroupIds:
+        - ${self:custom.lambdaExecSecurityGroup}
+       subnetIds:
+        - ${self:custom.SUBNET_ID_A}
+        - ${self:custom.SUBNET_ID_B}
+        - ${self:custom.SUBNET_ID_C}
     events:
       - http:
           path: ${self:custom.basePath}Complaints/{c_id}
@@ -183,7 +190,14 @@ functions:
           cors: true
 
   getPropertyByAddress:
-    handler: api/property/rds/_get.getpropertyByAdddressRDS
+    handler: api/property/rds/_get.getPropByAddRDS
+    vpc:
+       securityGroupIds:
+          - ${self:custom.lambdaExecSecurityGroup}
+       subnetIds:
+          - ${self:custom.SUBNET_ID_A}
+          - ${self:custom.SUBNET_ID_B}
+          - ${self:custom.SUBNET_ID_C}
     events:
         - http:
             path: ${self:custom.basePath}property/address/{p_address}
@@ -193,16 +207,16 @@ functions:
               parameters:
                 paths:
                   p_address: true
-    vpc:
-      securityGroupIds:
-       - sg-d3945ca7
-      subnetIds:
-       - subnet-dcc36df3
-       - subnet-7cd07321
-       - subnet-2ab9ab26
 
   getLandlordbyProperty:
-    handler: api/landlord/rds/_get.getlandlordByPropertyRDS
+    handler: api/landlord/rds/_getByproperty.getlandlordByPropertyRDS
+    vpc:
+       securityGroupIds:
+          - ${self:custom.lambdaExecSecurityGroup}
+       subnetIds:
+          - ${self:custom.SUBNET_ID_A}
+          - ${self:custom.SUBNET_ID_B}
+          - ${self:custom.SUBNET_ID_C}
     events:
       - http:
           path: ${self:custom.basePath}landlord/property/{p_id}
@@ -212,10 +226,4 @@ functions:
             parameters:
               paths:
                 p_id: true
-    vpc:
-      securityGroupIds:
-       - sg-d3945ca7
-      subnetIds:
-       - subnet-dcc36df3
-       - subnet-7cd07321
-       - subnet-2ab9ab26
+
