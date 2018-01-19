@@ -13,8 +13,8 @@ module.exports = {
       {
         test: /\.js$/,
         loader: "babel-loader",
-        include: __dirname,
-        exclude: /node_modules/
+        include: __dirname
+       // exclude: /node_modules/
       }
     ]
   }
