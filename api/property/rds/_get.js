@@ -17,10 +17,11 @@ export function getPropByAddRDS(event, context, callback) {
             var resultlist = [];
             var i = 0;
 
-            var p_address = decodeURI(event["pathParameters"]["p_address"]).toUpperCase();
+            var p_address = decodeURIComponent(decodeURIComponent(event["pathParameters"]["p_address"]));
 
+            console.log(p_address);
             try {
-                var sql = "SELECT P_ID, P_Address_Line1 FROM Property where P_Address_Line1 != ' ' and P_Address_Line1 like '%" + p_address + "%' LIMIT 50" ;
+                var sql = "SELECT P_ID, P_Address_Line1 FROM Property where P_Address_Line1 != ' ' and UPPER(P_Address_Line1) like '%" + p_address.toUpperCase() + "%' LIMIT 50" ;
                 connection.query(sql, p_address, function (err, rows) {
                     if (err != null)
                         callback(null, err);

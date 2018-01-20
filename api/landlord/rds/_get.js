@@ -18,10 +18,9 @@ export  function getlandlordByNameRDS(event, context, callback) {
             var resultlist = [];
             var i = 0;
 
-            var Fname = event["pathParameters"]["Fname"].toUpperCase();
-
+            var Fname = decodeURIComponent(decodeURIComponent(event.pathParameters.Fname));
             try {
-                var sql = "SELECT L_ID, L_Full_Name from rentvent.Landlord where L_Full_Name LIKE '%" + Fname+"%' ";
+                var sql = "SELECT L_ID, L_Full_Name from rentvent.Landlord where UPPER(L_Full_Name)LIKE '%" + Fname.toUpperCase()+"%' ";
                 console.log(sql);
                 connection.query(sql, Fname,
 
