@@ -95,8 +95,11 @@ export async function getlandlordInfo(event, context, callback) {
         //get landlord data
         var result = await dynamoDbLib.call("query", params);
         console.log("First Step ", result);
-        if(result.Items.Count == 0 )
-            callback(success("Not Found"));
+        if(result.Count <= 0 ){
+            callback(null,success("Not Found"));
+            return;
+        }
+
 
 
         // get review for landlord
@@ -167,7 +170,6 @@ export async function getlandlordInfo(event, context, callback) {
         console.log("after IF ", ReviewResponseList);
         console.log(result.Items[0]);
         result.Items[0].Landlord_Reviews = Review.Count > 0 ? ReviewResponseList : [];
-
 
 
         // set the avg variable
