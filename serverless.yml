@@ -227,3 +227,15 @@ functions:
               paths:
                 p_id: true
 
+  getComplaintscloudSearch:
+    handler: api/complaints/cloudSearch/_get.getComplaintsSearch
+    events:
+      - http:
+          path: ${self:custom.basePath}Complaints/cloudsearch/{p_address}
+          method: get
+          cors: true
+          request:
+            parameters:
+              paths:
+                p_address: true
+
