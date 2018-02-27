@@ -1,5 +1,9 @@
 import * as dynamoDbLib from "../../../libs/dynamodb-lib";
 import { success, failure } from "../../../libs/response-lib";
+import AWS from "aws-sdk";
+AWS.config.update({ region: "us-east-1" });
+// global varible for get landlord detailes 
+var l_result;
 
 export async function getlandlordByName(event, context, callback) {
 
@@ -31,12 +35,12 @@ export async function getlandlordByName(event, context, callback) {
 
 export async function getlandlordByPropertydaynamo(event, context, callback) {
 
-    const p_id =event.pathParameters.p_id;
+    const p_id = event.pathParameters.p_id;
     const params = {
         TableName: 'rv_landlord',
         FilterExpression: "contains(L_Properties, :L_Properties)",
         ExpressionAttributeValues: {
-            ":L_Properties": {'p_id': parseInt(p_id, 10)}
+            ":L_Properties": { 'p_id': parseInt(p_id, 10) }
         }
     };
 
@@ -44,7 +48,7 @@ export async function getlandlordByPropertydaynamo(event, context, callback) {
         var landlord = await dynamoDbLib.call("scan", params);
 
         console.log(landlord);
-        var size = 0 ; var landlordResponseList =[];
+        var size = 0; var landlordResponseList = [];
         if (landlord.Count > 0) {
             console.log("We have data", landlord);
             while (landlord.Count > size) {
@@ -68,13 +72,8 @@ export async function getlandlordByPropertydaynamo(event, context, callback) {
 }
 
 export async function getlandlordInfo(event, context, callback) {
+    console.log("getlandlordInfonew begin !!!");
 
-    var L_Avg_Rating = 0;
-    var L_Approval_Rate = 0;
-    var LR_Repair_Requests = 0;
-    var L_Response_Rate = 0;
-    var L_Recommended_Rate = 0
-    // console.log(event.pathParameters.l_id) ;
     const params = {
         TableName: 'Landlord',
         KeyConditionExpression: "L_ID = :l_id",
@@ -82,38 +81,49 @@ export async function getlandlordInfo(event, context, callback) {
             ":l_id": event.pathParameters.l_id
         }
     };
+    try {
+
+        //get landlord data
+        l_result = await dynamoDbLib.call("query", params);
+        console.log("First Step ", l_result);
+        if (l_result.Count <= 0) {
+            callback(null, success("Not Found"));
+            return;
+        }
+        console.log("second Step get Landlord Review");
+        await getlandlordReviews(event.pathParameters.l_id);
+
+        console.log("third Step get Landlord prperties");
+        await getProperties();
+
+        callback(null, success(l_result.Items[0]));
+    } catch (e) {
+        callback(null, failure(e));
+    }
+}
+
+export async function getlandlordReviews(l_id) {
+
+    console.log("getlandlordReviews begin !!!")
+    var L_Avg_Rating = 0;
+    var L_Approval_Rate = 0;
+    var LR_Repair_Requests = 0;
+    var L_Response_Rate = 0;
+    var L_Recommended_Rate = 0;
     const L_ReviewsParams = {
         TableName: 'Landlord_Reviews',
         FilterExpression: "LP_L_ID = :l_ID",
         ExpressionAttributeValues: {
-            ":l_ID": event.pathParameters.l_id
+            ":l_ID": l_id
         }
     };
 
     try {
-
-        //get landlord data
-        var result = await dynamoDbLib.call("query", params);
-        console.log("First Step ", result);
-        if(result.Count <= 0 ){
-            callback(null,success("Not Found"));
-            return;
-        }
-
-
-
-        // get review for landlord
-
         var Review = await dynamoDbLib.call("scan", L_ReviewsParams);
-        console.log("second Step ", Review);
-
-
-
-        console.log(result.Items[0]);
 
         var l_recommended = 0, l_approval = 0;
         var ReviewResponseList = [];
-        console.log(" ReviewResponseList = [];", ReviewResponseList);
+
         //Compute AVG
         if (Review.Count > 0) {
             console.log("compute step");
@@ -167,199 +177,174 @@ export async function getlandlordInfo(event, context, callback) {
                 ReviewResponseList = ReviewResponseList.concat(ReviewResponse);
             }
         }
-        console.log("after IF ", ReviewResponseList);
-        console.log(result.Items[0]);
-        result.Items[0].Landlord_Reviews = Review.Count > 0 ? ReviewResponseList : [];
+
+        l_result.Items[0].Landlord_Reviews = ReviewResponseList.length > 0 ? ReviewResponseList : [];
 
 
         // set the avg variable
-        result.Items[0].L_Response_Rate = isNaN(L_Response_Rate / Review.Count) ? 0 : L_Response_Rate / Review.Count;
-        result.Items[0].L_Avg_Rating = isNaN(L_Avg_Rating / Review.Count) ? 0 : L_Avg_Rating / Review.Count;
-        result.Items[0].L_Approval_Rate = isNaN(l_approval / Review.Count) ? 0 : l_approval / Review.Count;
-        result.Items[0].LR_Repair_Requests = isNaN(LR_Repair_Requests / Review.Count) ? 0 : LR_Repair_Requests / Review.Count;
+        l_result.Items[0].L_Response_Rate = isNaN(L_Response_Rate / Review.Count) ? 0 : L_Response_Rate / Review.Count;
+        l_result.Items[0].L_Avg_Rating = isNaN(L_Avg_Rating / Review.Count) ? 0 : L_Avg_Rating / Review.Count;
+        l_result.Items[0].L_Approval_Rate = isNaN(l_approval / Review.Count) ? 0 : l_approval / Review.Count;
+        l_result.Items[0].LR_Repair_Requests = isNaN(LR_Repair_Requests / Review.Count) ? 0 : LR_Repair_Requests / Review.Count;
+        console.log("getlandlordReviews ended successfully !!!")
 
-       // console.log(result.Items[0]);
-        console.log("done from reviews");
+    }
+    catch (err) {
+        return err;
+    }
+}
 
-
+export async function getProperties() {
+    console.log("getProperties begin !!!!");
+    try {
+        console
         //as l_properties as a string we need to convert it to json
-        var L_Properties = [];   var L_Complaints = [];
+        var L_Properties = []; var L_Complaints = [];
         //If this landlord has property
 
-        console.log("result.Items[0].L_Properties",result.Items[0].L_Properties);
+        console.log("l_result.Items[0].L_Properties ", l_result.Items[0].L_Properties);
+        if (l_result.Items[0].L_Properties != null) {
+            console.log("yes we have prop ");
+            //set the value of L_prop to valid Json Object
+            var ss = l_result.Items[0].L_Properties;
 
-        //set the value of L_prop to valid Json Object
-        var ss =  result.Items[0].L_Properties ;
+            //replace the Attribute name with double qoutes
+            var newstr = ss.replace(new RegExp('p_id', 'g'), '"p_id"');
 
-        //replace the Attribute name with double qoutes
-        var newstr = ss.replace(new RegExp('p_id', 'g'), '"p_id"');
+            // parse the string to json
+            var v_properties = JSON.parse(newstr);
 
+            console.log("property count", v_properties.length);
+            console.log("The property array " + v_properties);
 
-        console.log(newstr);
-        // parse the string to json
-        var v_properties =  JSON.parse(newstr);
+            var propertysize = v_properties.length;
+            if (propertysize > 0) {
 
-
-        console.log("property count" , v_properties.length);
-        console.log( "The property array " +v_properties);
-
-        var propertysize =  v_properties.length;
-        if (propertysize > 0) {
-            console.log("inside the loop");
-
-            for (let prop of v_properties) {
-
-
-                console.log("Value  of property " , prop);
-
-                var L_PropertiesParams = {
-                    TableName: 'rv_property',
-                    FilterExpression: "P_ID = :p_id",
-                    ExpressionAttributeValues: {
-                        ":p_id": prop.p_id.toString()
-                    }
-                };
-                var properties = await dynamoDbLib.call("scan", L_PropertiesParams);
-
-                console.log("GET property data ", properties);
-
-
-                // do we have data for this properties ? ?
-                if (properties.Count > 0) {
-
-                    // var p_address_search = properties.Items[0].P_Address_Line1;
-                    // get complains by address
-
-                    //split the address line 2 in order to get result in complains
-
-                    var stringArray = properties.Items[0].P_Address_Line1.split(/(\s+)/);
-                    // i start from 2 as the first two sluts is the zip code and space
-                    var size = 2;
-                    var p_address_search;
-                    while (stringArray.length > size) {
-                        if (stringArray[size] != '') {
-
-                            p_address_search = stringArray[size];
-                            console.log("p_address_search", p_address_search);
-                            break;
-                        }
-                        size++;
-                    }
-                    var complainsParam = {
-                        TableName: 'Complaints',
-                        FilterExpression: "contains(C_Address_Line_1, :p_address)",
-                        ExpressionAttributeValues: {
-                            ":p_address": p_address_search
-                        },
-                        limit :10000
-                    };
-
-
-                    console.log("get complains by address begin", p_address_search);
-
-                    var complains =  await dynamoDbLib.call("scan", complainsParam);
-
-                    console.log("complains result " ,complains);
-
-                    if(complains.Count> 0)
-                    {
-                        console.log("we have complains for this property ");
-                        for (let comp of complains.Items )
-                        {
-                            //build the object
-                            var complainObj = {
-                                'C_ID' : comp.C_ID
-                            };
-                            L_Complaints.push(complainObj);
-                        }
-
-
-                        console.log("L_Complaints",L_Complaints);
-                    }
-                    else
-                    {
-                        var complainsParam2 = {
-                            TableName: 'Complaints',
-                            FilterExpression: "P_ID = :p_id",
-                            ExpressionAttributeValues: {
-                                ":p_id":  properties.Items[0].P_ID
-                            }
-                        };
-
-                        var complains =  await dynamoDbLib.call("scan", complainsParam2);
-
-
-                        if(complains.Count> 0)
-                        {
-                            console.log("we have complains for this property ");
-                            for (let comp of complains.Items )
-                            {
-                                //build the object
-                                var complainObj = {
-                                    'C_ID' : comp.C_ID
-                                };
-                                L_Complaints.push(complainObj);
-                            }
-
-
-                            console.log("L_Complaints",L_Complaints);
-                        }
-                    }
-
-                    // get property review param from table
-                    var PropertiesReviewParams = {
-                        TableName: 'Property_Reviews',
+                for (let prop of v_properties) {
+                    console.log("prop", prop);
+                    var L_PropertiesParams = {
+                        TableName: 'rv_property',
                         FilterExpression: "P_ID = :p_id",
                         ExpressionAttributeValues: {
-                            ":p_id": properties.Items[0].P_ID
+                            ":p_id": prop.p_id.toString()
                         }
                     };
-                    console.log("we have data propertiesReview ");
+                    var properties = await dynamoDbLib.call("scan", L_PropertiesParams);
 
-                    var propertiesReview = await dynamoDbLib.call("scan", PropertiesReviewParams);
+                    console.log("GET property data ", properties);
 
-                    var sum_prop_avg = 0
-                    if (propertiesReview.Count > 0) {
-                        console.log("we have data  propertiesReview", propertiesReview.Items);
+                    // do we have data for this properties ? ?
+                    if (properties.Count > 0) {
 
-                        //compute the avg rating for property
-                        var p_review_count = 0;
-                        while (propertiesReview.Count > p_review_count) {
-                            console.log("inside loop", propertiesReview.Items);
-                            sum_prop_avg = propertiesReview.Items[p_review_count].LR_Rating + sum_prop_avg;
-                            p_review_count++;
+                        var item = properties.Items[0];
+                        console.log("item.P_Address_Line1", item.P_Address_Line1);
+
+                        console.log("forth Step get  prperties complaints");
+                        var complaints = await getcomplaints(item.P_Address_Line1);
+                        console.log("complaints", complaints);
+
+                        if (complaints.length > 0) {
+                            console.log("we have complains for this property ");
+                            for (let comp of complaints) {
+                                //build the object
+                                var complaintsObj = {
+                                    'C_ID': comp.c_id
+                                };
+                                L_Complaints.push(complaintsObj);
+                            }
                         }
+                        //get property review 
+                        console.log("fifth Step get  prperties reviews");
+                        var propertiesReview = await getproprtyReview(item.p_id)
 
-                        console.log("compute the avg ", sum_prop_avg / propertiesReview.Count);
+                        // prepare property response
+                        var propResponse = {
+                            'P_ID': properties.Items[0].P_ID,
+                            'P_Photos': properties.Items[0].P_Photos,
+                            'P_Address_Line1': properties.Items[0].P_Address_Line1,
+                            'P_Address_Line2': properties.Items[0].P_Address_Line2,
+                            'P_City': properties.Items[0].P_City,
+                            'P_Zipcode': properties.Items[0].P_Zipcode,
+                            'P_State': properties.Items[0].P_State,
+                            'PR_Rating': propertiesReview.Count > 0 ? propertiesReview.avgReview : 0,
+                            'PR_Count': propertiesReview.Count > 0 ? propertiesReview.Count : 0,
+                            'P_Complaints': complaints.length > 0 ? L_Complaints : []
+                        };
+                        console.log("propResponse", propResponse);
+
+                        L_Properties = L_Properties.concat(propResponse);
                     }
-
-
-                    // prepare property response
-                    var propResponse = {
-                        'P_ID': properties.Items[0].P_ID,
-                        'P_Photos': properties.Items[0].P_Photos,
-                        'P_Address_Line1': properties.Items[0].P_Address_Line2,
-                        'P_Address_Line2': properties.Items[0].P_Address_Line2,
-                        'P_City': properties.Items[0].P_City,
-                        'P_Zipcode': properties.Items[0].P_Zipcode,
-                        'P_State': properties.Items[0].P_State,
-                        'PR_Rating': propertiesReview.Count > 0 ? sum_prop_avg / propertiesReview.Count : 0,
-                        'PR_Count': propertiesReview.Count > 0 ? propertiesReview.Count : 0
-                    };
-                    console.log("propResponse", propResponse);
-
-                    L_Properties = L_Properties.concat(propResponse);
-
                 }
             }
-            result.Items[0].L_Properties = propertysize > 0 ? L_Properties : [];
-            result.Items[0].L_Complaints = propertysize > 0  ? L_Complaints : [];
-
-            //console.log(result);
+            l_result.Items[0].L_Properties = propertysize > 0 ? L_Properties : [];
         }
+    }
+    catch (err) {
+        return err;
+    }
+}
 
-        callback(null, success(result));
-    } catch (e) {
-        callback(null, failure(e));
+export async function getcomplaints(p_address) {
+
+    console.log("getcomplaintsObj begin!!!! ");
+    console.log(p_address);
+    var csd = new AWS.CloudSearchDomain({
+        endpoint: 'search-complaints-fpo6pfj3dowxfbboyfllktyb4q.us-east-1.cloudsearch.amazonaws.com',
+        apiVersion: '2013-01-01'
+    });
+    var params = {
+        query: p_address
+    };
+    var listOfObject = [];
+    try {
+        var data = await csd.search(params).promise();
+        console.log(data);
+        var i = 0;
+
+        while (i < data.hits.hit.length) {
+            var obj = JSON.parse(JSON.stringify(data.hits.hit[i].fields).replace(/[\[\]']+/g, ''));
+            listOfObject.push(obj);
+            i++;
+        }
+        console.log(listOfObject);
+        console.log("getcomplaintsObj ended successfully!!!! ");
+        return listOfObject;
+    }
+    catch (err) {
+        console.log(err, err.stack); // an error occurred
+        return err;
+    }
+}
+
+export async function getproprtyReview(p_id) {
+    try {
+        console.log("getproprtyReview begin !!!");
+        // get property review param from table
+        var PropertiesReviewParams = {
+            TableName: 'Property_Reviews',
+            FilterExpression: "P_ID = :p_id",
+            ExpressionAttributeValues: {
+                ":p_id": p_id
+            }
+        };
+        var propertiesReview = await dynamoDbLib.call("scan", PropertiesReviewParams);
+        var sum_prop_avg = 0
+        if (propertiesReview.Count > 0) {
+            console.log("we have data  propertiesReview", propertiesReview.Items);
+
+            //compute the avg rating for property
+            var p_review_count = 0;
+            while (propertiesReview.Count > p_review_count) {
+                sum_prop_avg = propertiesReview.Items[p_review_count].LR_Rating + sum_prop_avg;
+                p_review_count++;
+            }
+        }
+        var avgReview = sum_prop_avg / propertiesReview.Count;
+
+        console.log("getproprtyReview ended successfully!!!! ");
+        return { 'avgReview': avgReview, 'count': propertiesReview.Count };
+    }
+    catch (err) {
+        return err;
     }
 }

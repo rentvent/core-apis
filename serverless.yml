@@ -238,4 +238,28 @@ functions:
             parameters:
               paths:
                 p_address: true
+  getLandlordcloudSearch:
+    handler: api/landlord/cloudSearch/_get.getLandlordSearch
+    events:
+      - http:
+          path: ${self:custom.basePath}landlord/cloudsearch/{p_name}
+          method: get
+          cors: true
+          request:
+            parameters:
+              paths:
+                p_name: true
+
+#   getPropertycloudSearch:
+#     handler: api/property/cloudSearch/_get.getPropertySearch
+#     events:
+#       - http:
+#           path: ${self:custom.basePath}property/cloudsearch/{proprty_address}
+#           method: get
+#           cors: true
+#           request:
+#             parameters:
+#               paths:
+#                 proprty_address: true
+
 
