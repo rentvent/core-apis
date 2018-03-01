@@ -5,72 +5,6 @@ AWS.config.update({ region: "us-east-1" });
 // global varible for get landlord detailes 
 var l_result;
 
-export async function getlandlordByName(event, context, callback) {
-
-    const params = {
-        TableName: 'rv_landlord',
-        FilterExpression: "contains(L_Full_Name,:Fname)",
-        ExpressionAttributeValues: {
-            ":Fname": event.pathParameters.Fname.toUpperCase()
-        },
-        Limit: 1000,
-    };
-    try {
-        const result = await dynamoDbLib.call("scan", params);
-
-        var resultList = [];
-        for (let item of result.Items) {
-            var object = {
-                L_ID: item.L_ID,
-                L_Full_Name: item.L_Full_Name
-            }
-            resultList.push(object)
-        }
-
-        callback(null, success(resultList));
-    } catch (e) {
-        callback(null, failure(e));
-    }
-}
-
-export async function getlandlordByPropertydaynamo(event, context, callback) {
-
-    const p_id = event.pathParameters.p_id;
-    const params = {
-        TableName: 'rv_landlord',
-        FilterExpression: "contains(L_Properties, :L_Properties)",
-        ExpressionAttributeValues: {
-            ":L_Properties": { 'p_id': parseInt(p_id, 10) }
-        }
-    };
-
-    try {
-        var landlord = await dynamoDbLib.call("scan", params);
-
-        console.log(landlord);
-        var size = 0; var landlordResponseList = [];
-        if (landlord.Count > 0) {
-            console.log("We have data", landlord);
-            while (landlord.Count > size) {
-
-                var landlordResponse = {
-                    'L_ID': landlord.Items[size].L_ID,
-                    'L_Full_Name': landlord.Items[size].L_Full_Name
-                }
-                landlordResponseList = landlordResponseList.concat(landlordResponse);
-                console.log(landlordResponseList)
-                size++;
-            }
-
-        };
-
-        callback(null, success(landlordResponseList));
-    } catch (e) {
-        callback(null, failure(e));
-    }
-
-}
-
 export async function getlandlordInfo(event, context, callback) {
     console.log("getlandlordInfonew begin !!!");
 
@@ -166,7 +100,7 @@ export async function getlandlordReviews(l_id) {
                 var ReviewResponse = {
                     'LR_Title': item.LR_Title,
                     'LR_Types': item.LR_Types,
-                    'LR_Created_Date': item.LR_Created_Date,
+                    'LR_Created_Date': item.LR_Created_On,
                     'LR_Rating': item.LR_Rating,
                     'LR_Responsiveness': item.LR_Responsiveness,
                     'LR_Repair_Requests': item.LR_Repair_Requests,
@@ -348,3 +282,4 @@ export async function getproprtyReview(p_id) {
         return err;
     }
 }
+

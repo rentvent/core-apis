@@ -60,54 +60,30 @@ provider:
         - logs:GetLogEvents
       Resource: "*"
 
-
-#resources:
-#  Resources:
-#    ServerlessSecurityGroup:
-#      Type: AWS::EC2::SecurityGroup
-#      Properties:
-#        GroupDescription: SecurityGroup for Serverless Functions
-#        VpcId: ${self:custom.VPC_ID}
-#    RDSSecurityGroup:
-#      Type: AWS::EC2::SecurityGroup
-#      Properties:
-#        GroupDescription: Ingress for RDS Instance
-#        VpcId: ${self:custom.VPC_ID}
-#        SecurityGroupIngress:
-#        - IpProtocol: tcp
-#          FromPort: '5432'
-#          ToPort: '5432'
-#          SourceSecurityGroupId:
-#            Ref: ServerlessSecurityGroup
-#    RDSSubnetGroup:
-#      Type: AWS::RDS::DBSubnetGroup
-#      Properties:
-#        DBSubnetGroupDescription: RDS Subnet Group
-#        SubnetIds:
-#          - ${self:custom.SUBNET_ID_A}
-#          - ${self:custom.SUBNET_ID_B}
-#          - ${self:custom.SUBNET_ID_C}
-
 functions:
+  #Landlord API 
   getLandlordByName:
-    handler: api/landlord/rds/_get.getlandlordByNameRDS
-    vpc:
-       securityGroupIds:
-          - ${self:custom.lambdaExecSecurityGroup}
-       subnetIds:
-          - ${self:custom.SUBNET_ID_A}
-          - ${self:custom.SUBNET_ID_B}
-          - ${self:custom.SUBNET_ID_C}
+    handler: api/landlord/cloudSearch/_get.getLandlordSearch
     events:
       - http:
-          path: ${self:custom.basePath}landlord/search/{Fname}
+          path: ${self:custom.basePath}landlord/cloudsearch/{p_name}
           method: get
           cors: true
           request:
             parameters:
               paths:
-                Fname: true
-
+                p_name: true
+  getLandlordbyProperty:
+    handler: api/landlord/cloudSearch/_get.getLandlordbyProperty
+    events:
+      - http:
+          path: ${self:custom.basePath}landlord/property/{lp_address}
+          method: get
+          cors: true
+          request:
+            parameters:
+              paths:
+                p_address: true
   getLandlordDetailes:
     handler: api/landlord/dynamo/_get.getlandlordInfo
     events:
@@ -119,6 +95,8 @@ functions:
             parameters:
               paths:
                 Fname: true
+
+# Property API            
   getPropertyById:
     handler: api/property/dynamo/_get.getpropertyById
     events:
@@ -130,30 +108,37 @@ functions:
             parameters:
               paths:
                 p_id: true
-  getRental:
-    handler: api/rental/_get.getrental
+  getPropertyByAddress:
+    handler: api/property/rds/_get.getPropByAddRDS
+    vpc:
+       securityGroupIds:
+          - ${self:custom.lambdaExecSecurityGroup}
+       subnetIds:
+          - ${self:custom.SUBNET_ID_A}
+          - ${self:custom.SUBNET_ID_B}
+          - ${self:custom.SUBNET_ID_C}
+    events:
+        - http:
+            path: ${self:custom.basePath}property/address/{p_address}
+            method: get
+            cors: true
+            request:
+              parameters:
+                paths:
+                  p_address: true
+# Complaints API 
+  getComplaintscloudSearch:
+    handler: api/complaints/cloudSearch/_get.getComplaintsSearch
     events:
       - http:
-          path: ${self:custom.basePath}rental/{r_id}
+          path: ${self:custom.basePath}Complaints/cloudsearch/{p_address}
           method: get
           cors: true
           request:
             parameters:
               paths:
-                r_id: true
-  getQuestionnaire:
-    handler: api/questionnaire/_get.getQuestionnaire
-    events:
-      - http:
-          path: ${self:custom.basePath}question/{q_type}/{search_by}/{search_val}
-          method: get
-          cors: true
-          request:
-            parameters:
-              paths:
-                q_type: true
-                search_by: true
-                search_val: true
+                p_address: true
+
   getComplaints:
     handler: api/complaints/rds/_get.getComplaintsRDS
     vpc:
@@ -173,6 +158,34 @@ functions:
               paths:
                 c_id: true
   
+#Rental API 
+  getRental:
+    handler: api/rental/_get.getrental
+    events:
+      - http:
+          path: ${self:custom.basePath}rental/{r_id}
+          method: get
+          cors: true
+          request:
+            parameters:
+              paths:
+                r_id: true
+
+  # Questionner API 
+  getQuestionnaire:
+    handler: api/questionnaire/_get.getQuestionnaire
+    events:
+      - http:
+          path: ${self:custom.basePath}question/{q_type}/{search_by}/{search_val}
+          method: get
+          cors: true
+          request:
+            parameters:
+              paths:
+                q_type: true
+                search_by: true
+                search_val: true
+
   submiteQuestionnaire:
     handler: api/questionnaire/_post.submiteQuestionnaire
     events:
@@ -180,7 +193,7 @@ functions:
           path: ${self:custom.basePath}questionnaire
           method: post
           cors: true
-          
+  #TenantAPI 
   createTenant:
     handler: api/tenant/_post.createTenant
     events:
@@ -189,66 +202,8 @@ functions:
           method: post
           cors: true
 
-  getPropertyByAddress:
-    handler: api/property/rds/_get.getPropByAddRDS
-    vpc:
-       securityGroupIds:
-          - ${self:custom.lambdaExecSecurityGroup}
-       subnetIds:
-          - ${self:custom.SUBNET_ID_A}
-          - ${self:custom.SUBNET_ID_B}
-          - ${self:custom.SUBNET_ID_C}
-    events:
-        - http:
-            path: ${self:custom.basePath}property/address/{p_address}
-            method: get
-            cors: true
-            request:
-              parameters:
-                paths:
-                  p_address: true
-
-  getLandlordbyProperty:
-    handler: api/landlord/rds/_getByproperty.getlandlordByPropertyRDS
-    vpc:
-       securityGroupIds:
-          - ${self:custom.lambdaExecSecurityGroup}
-       subnetIds:
-          - ${self:custom.SUBNET_ID_A}
-          - ${self:custom.SUBNET_ID_B}
-          - ${self:custom.SUBNET_ID_C}
-    events:
-      - http:
-          path: ${self:custom.basePath}landlord/property/{p_id}
-          method: get
-          cors: true
-          request:
-            parameters:
-              paths:
-                p_id: true
-
-  getComplaintscloudSearch:
-    handler: api/complaints/cloudSearch/_get.getComplaintsSearch
-    events:
-      - http:
-          path: ${self:custom.basePath}Complaints/cloudsearch/{p_address}
-          method: get
-          cors: true
-          request:
-            parameters:
-              paths:
-                p_address: true
-  getLandlordcloudSearch:
-    handler: api/landlord/cloudSearch/_get.getLandlordSearch
-    events:
-      - http:
-          path: ${self:custom.basePath}landlord/cloudsearch/{p_name}
-          method: get
-          cors: true
-          request:
-            parameters:
-              paths:
-                p_name: true
+ 
+  
 
 #   getPropertycloudSearch:
 #     handler: api/property/cloudSearch/_get.getPropertySearch

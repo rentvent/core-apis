@@ -24,19 +24,41 @@ sls remove
 
 
 EndPoint :
-  GET - 
-  
-
-  GET - https://50sq1sgno7.execute-api.us-east-1.amazonaws.com/prod/Vent.Rent/landlord/search/{Fname}
-  GET - https://50sq1sgno7.execute-api.us-east-1.amazonaws.com/prod/Vent.Rent/landlord/{l_id}
-  GET - https://50sq1sgno7.execute-api.us-east-1.amazonaws.com/prod/Vent.Rent/property/{p_id}
-  GET - https://50sq1sgno7.execute-api.us-east-1.amazonaws.com/prod/Vent.Rent/rental/{r_id}
-  GET - https://50sq1sgno7.execute-api.us-east-1.amazonaws.com/prod/Vent.Rent/question/{q_type}/{search_by}/{search_val}
-  GET - https://50sq1sgno7.execute-api.us-east-1.amazonaws.com/prod/Vent.Rent/Complaints/{c_id}
-  POST - https://50sq1sgno7.execute-api.us-east-1.amazonaws.com/prod/Vent.Rent/questionnaire
-  POST - https://50sq1sgno7.execute-api.us-east-1.amazonaws.com/prod/Vent.Rent/tenant
-  GET - https://50sq1sgno7.execute-api.us-east-1.amazonaws.com/prod/Vent.Rent/property/address/{p_address}
-  GET - https://50sq1sgno7.execute-api.us-east-1.amazonaws.com/prod/Vent.Rent/landlord/property/{p_id}
-  GET - https://50sq1sgno7.execute-api.us-east-1.amazonaws.com/prod/Vent.Rent/Complaints/cloudsearch/{p_address}
+  GET - https://rm9ikv7dkc.execute-api.us-east-1.amazonaws.com/prod/Vent.Rent/landlord/cloudsearch/{p_name}
+  GET - https://rm9ikv7dkc.execute-api.us-east-1.amazonaws.com/prod/Vent.Rent/landlord/property/{lp_address}
+  GET - https://rm9ikv7dkc.execute-api.us-east-1.amazonaws.com/prod/Vent.Rent/landlord/{l_id}
+  GET - https://rm9ikv7dkc.execute-api.us-east-1.amazonaws.com/prod/Vent.Rent/property/{p_id}
+  GET - https://rm9ikv7dkc.execute-api.us-east-1.amazonaws.com/prod/Vent.Rent/property/address/{p_address}
+  GET - https://rm9ikv7dkc.execute-api.us-east-1.amazonaws.com/prod/Vent.Rent/Complaints/cloudsearch/{p_address}
+  GET - https://rm9ikv7dkc.execute-api.us-east-1.amazonaws.com/prod/Vent.Rent/Complaints/{c_id}
+  GET - https://rm9ikv7dkc.execute-api.us-east-1.amazonaws.com/prod/Vent.Rent/rental/{r_id}
+  GET - https://rm9ikv7dkc.execute-api.us-east-1.amazonaws.com/prod/Vent.Rent/question/{q_type}/{search_by}/{search_val}
+  POST - https://rm9ikv7dkc.execute-api.us-east-1.amazonaws.com/prod/Vent.Rent/questionnaire
+  POST - https://rm9ikv7dkc.execute-api.us-east-1.amazonaws.com/prod/Vent.Rent/tenant
 
   
+
+
+
+Example: 
+get landlord by name 
+  https://rm9ikv7dkc.execute-api.us-east-1.amazonaws.com/prod/Vent.Rent/landlord/cloudsearch/doad
+
+get landlord by address 
+  https://rm9ikv7dkc.execute-api.us-east-1.amazonaws.com/prod/Vent.Rent/landlord/property/y
+
+get landlord by ID 
+  https://rm9ikv7dkc.execute-api.us-east-1.amazonaws.com/prod/Vent.Rent/landlord/3005044007
+
+get property  by ID 
+  https://rm9ikv7dkc.execute-api.us-east-1.amazonaws.com/prod/Vent.Rent/property/3109002069
+
+get proeprty by address
+  https://rm9ikv7dkc.execute-api.us-east-1.amazonaws.com/prod/Vent.Rent/property/address/wee
+
+  get complatins by address 
+https://rm9ikv7dkc.execute-api.us-east-1.amazonaws.com/prod/Vent.Rent/Complaints/cloudsearch/e
+
+get complaints by ID 
+https://rm9ikv7dkc.execute-api.us-east-1.amazonaws.com/prod/Vent.Rent/Complaints/61f91bb6-f944-11e7-8ada-06e4deec977a
+
