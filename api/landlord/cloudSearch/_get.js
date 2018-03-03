@@ -4,8 +4,9 @@ AWS.config.update({ region: "us-east-1" });
 
 export async function getLandlordSearch(event, context, callback) {
   try {
+    var p_name = decodeURIComponent(decodeURIComponent(event["pathParameters"]["p_name"]));
     var params = {
-      query: event.pathParameters.p_name,
+      query: p_name,
       queryOptions : "{'fields':['l_full_name']}" 
     }
     var result = await GetLandlord(params);
@@ -17,9 +18,10 @@ export async function getLandlordSearch(event, context, callback) {
 }
 
 export async function getLandlordbyProperty(event, context, callback) {
+  var p_address = decodeURIComponent(decodeURIComponent(event["pathParameters"]["lp_address"]));
   try {
     var params = {
-      query: event.pathParameters.lp_address,
+      query: p_address,
       queryOptions : "{'fields':['p_address']}" 
     }
     var result = await GetLandlord(params);
@@ -33,7 +35,7 @@ export async function getLandlordbyProperty(event, context, callback) {
 async function GetLandlord(p_params) {
   console.log("GetLandlord begin !!!!!")
   var csd = new AWS.CloudSearchDomain({
-    endpoint: 'search-landlord-v2-yjef3lzy36f3gpjc4iqo5dpula.us-east-1.cloudsearch.amazonaws.com',
+    endpoint: 'search-landlord-hbh2pd23kqbxmavfajjklhhume.us-east-1.cloudsearch.amazonaws.com',
     apiVersion: '2013-01-01'
   });
   var listOfObject = []; var i = 0;

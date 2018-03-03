@@ -41,24 +41,16 @@ EndPoint :
 
 
 Example: 
-get landlord by name 
-  https://rm9ikv7dkc.execute-api.us-east-1.amazonaws.com/prod/Vent.Rent/landlord/cloudsearch/doad
-
 get landlord by address 
-  https://rm9ikv7dkc.execute-api.us-east-1.amazonaws.com/prod/Vent.Rent/landlord/property/y
 
-get landlord by ID 
-  https://rm9ikv7dkc.execute-api.us-east-1.amazonaws.com/prod/Vent.Rent/landlord/3005044007
+https://rm9ikv7dkc.execute-api.us-east-1.amazonaws.com/prod/Vent.Rent/landlord/property/333%20CROWN%20DR
 
-get property  by ID 
-  https://rm9ikv7dkc.execute-api.us-east-1.amazonaws.com/prod/Vent.Rent/property/3109002069
+get land landlord by ID 
 
-get proeprty by address
-  https://rm9ikv7dkc.execute-api.us-east-1.amazonaws.com/prod/Vent.Rent/property/address/wee
+https://rm9ikv7dkc.execute-api.us-east-1.amazonaws.com/prod/Vent.Rent/landlord/2280022031
 
-  get complatins by address 
-https://rm9ikv7dkc.execute-api.us-east-1.amazonaws.com/prod/Vent.Rent/Complaints/cloudsearch/e
 
-get complaints by ID 
-https://rm9ikv7dkc.execute-api.us-east-1.amazonaws.com/prod/Vent.Rent/Complaints/61f91bb6-f944-11e7-8ada-06e4deec977a
+get property by ID 
+https://rm9ikv7dkc.execute-api.us-east-1.amazonaws.com/prod/Vent.Rent/property/2280022031
 
+ 

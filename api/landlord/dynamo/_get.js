@@ -20,6 +20,7 @@ export async function getlandlordInfo(event, context, callback) {
         //get landlord data
         l_result = await dynamoDbLib.call("query", params);
         console.log("First Step ", l_result);
+
         if (l_result.Count <= 0) {
             callback(null, success("Not Found"));
             return;
@@ -81,19 +82,21 @@ export async function getlandlordReviews(l_id) {
                 L_Response_Rate = L_Response_Rate + item.LR_Responsiveness;
                 L_Avg_Rating = L_Avg_Rating + item.LR_Rating;
                 LR_Repair_Requests = LR_Repair_Requests + item.LR_Repair_Requests;
-                console.log("compute step5 ", L_Avg_Rating);
+                console.log("compute step5", L_Avg_Rating);
 
                 // in order to get the city and state
+                console.log("uhunjj");
                 var Tenant;
-                if (item.T_ID != null) {
+                if (item.LR_T_ID != null) {
                     var TenantParams = {
                         TableName: 'Tenant',
-                        FilterExpression: "T_ID = :t_id",
+                        KeyConditionExpression: "T_ID = :t_id",
                         ExpressionAttributeValues: {
-                            ":t_id": item.T_ID
+                            ":t_id": item.LR_T_ID
                         }
+
                     };
-                    Tenant = await dynamoDbLib.call("scan", TenantParams);
+                    Tenant = await dynamoDbLib.call("query", TenantParams);
                     console.log("Tenent Data ", Tenant);
                 }
                 //prepare review Response
@@ -103,7 +106,7 @@ export async function getlandlordReviews(l_id) {
                     'LR_Created_Date': item.LR_Created_On,
                     'LR_Rating': item.LR_Rating,
                     'LR_Responsiveness': item.LR_Responsiveness,
-                    'LR_Repair_Requests': item.LR_Repair_Requests,
+                    'LR_Repair_Requests': item.LR_Repair_Requests != null ? item.LR_Repair_Requests : '',
                     'LR_Approval': item.LR_Approval,
                     'T_City': Tenant != null ? Tenant.Items[0].T_City : ' ',
                     'T_State': Tenant != null ? Tenant.Items[0].T_State : ' '
@@ -111,7 +114,8 @@ export async function getlandlordReviews(l_id) {
                 ReviewResponseList = ReviewResponseList.concat(ReviewResponse);
             }
         }
-
+        console.log("uuuuuuuu", ReviewResponseList.length);
+      
         l_result.Items[0].Landlord_Reviews = ReviewResponseList.length > 0 ? ReviewResponseList : [];
 
 
@@ -156,14 +160,15 @@ export async function getProperties() {
 
                 for (let prop of v_properties) {
                     console.log("prop", prop);
-                    var L_PropertiesParams = {
+                    const L_PropertiesParams = {
                         TableName: 'rv_property',
-                        FilterExpression: "P_ID = :p_id",
+                        KeyConditionExpression: "P_ID = :p_id",
                         ExpressionAttributeValues: {
                             ":p_id": prop.p_id.toString()
                         }
                     };
-                    var properties = await dynamoDbLib.call("scan", L_PropertiesParams);
+                    console.log(prop.p_id.toString());
+                    var properties = await dynamoDbLib.call("query", L_PropertiesParams);
 
                     console.log("GET property data ", properties);
 
