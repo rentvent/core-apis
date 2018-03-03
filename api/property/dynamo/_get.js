@@ -262,9 +262,10 @@ async function getcomplaints(p_address) {
         console.log(listOfObject);
         
         var l_complaints = [] ;
-        for( comp in listOfObject)
+        for( let comp of listOfObject)
         {
-            l_complaints.push(c_id);
+            console.log(comp.c_id);
+            l_complaints.push(comp.c_id);
         }
 
         p_result.Items[0].L_Complaints = l_complaints ;
