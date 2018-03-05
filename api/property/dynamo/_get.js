@@ -70,7 +70,7 @@ async function getPropertyReview(p_id) {
                 var reviewResponse = {
                     "T_City": '', //Tenant != null ? Tenant.Items[0].T_City : ' ',
                     "T_State": '',//Tenant != null ? Tenant.Items[0].T_State : ' ',
-                    "PR_Description": item.PR_Description,
+                    "PR_Types": item.PR_Types,
                     "PR_Created_Date": item.PR_Created_Date
                 }
 

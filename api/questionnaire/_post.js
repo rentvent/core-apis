@@ -15,11 +15,12 @@ export async function submiteQuestionnaire(event, context, callback) {
             ID: uuid.v1(),
             LP_L_ID: data.landlordID,
             LR_T_ID: data.tenant_id,
-            LR_Types: [
+            LR_Types: data.LR_Types,
+           /* [
                 { LR_Type: "Advice", description: data.LL_Q_Advice },
                 { LR_Type: "Con", description: data.LL_Q_Con },
                 { LR_Type: "Pro", description: data.LL_Q_Pro }
-            ],
+            ],*/
             LR_Title: data.LL_Q_Title,
             LR_Approval: 0,
             LR_Recommend: data.LL_Q_Recommend_Landlord,
@@ -55,25 +56,6 @@ export async function submiteQuestionnaire(event, context, callback) {
         }
     };
 
-    var propertyReveiwParams = {
-        TableName: "Property_Reviews",
-        Item: {
-            PR_ID: uuid.v1(),
-            PR_T_ID: data.tenant_id,
-            PR_Description: [
-                { PR_Type: "Con", description: data.P_Q_Con },
-                { PR_Type: "Pro", description: data.P_Q_Pro }
-            ],
-            PR_Approval: data.P_Q_Recommend_Property,
-            PR_Rating: data.P_Q_Overall_Experience,
-            PR_Title: data.Q_Title,
-            PR_Condition: data.P_Q_Condition_Listing,
-            PR_Created_By: "Questionnaire",
-            PR_Updated_By: "Questionnaire",
-            PR_Created_Date: format.asString(new Date()),
-            PR_Updated_On: format.asString(new Date())
-        }
-    }
 
     var propertyReveiwParams = {
         TableName: "Property_Reviews",
@@ -81,10 +63,7 @@ export async function submiteQuestionnaire(event, context, callback) {
             PR_ID: uuid.v1(),
             PR_T_ID: data.tenant_id,
             P_ID : data.propertyID,
-            PR_Description: [
-                { PR_Type: "Con", description: data.P_Q_Con },
-                { PR_Type: "Pro", description: data.P_Q_Pro }
-            ],
+            PR_Types : data.PR_Types ,
             PR_Approval: data.P_Q_Recommend_Property,
             PR_Rating: data.P_Q_Overall_Experience,
             PR_Title: data.P_Q_Title,
