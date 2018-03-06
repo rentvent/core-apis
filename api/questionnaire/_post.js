@@ -52,7 +52,8 @@ export async function submiteQuestionnaire(event, context, callback) {
             R_Created_By: "Questionnaire",
             R_Updated_By: "Questionnaire",
             R_Created_On: format.asString(new Date()),
-            R_Updated_On: format.asString(new Date())
+            R_Updated_On: format.asString(new Date()),
+            R_P_ID : data.propertyID,
         }
     };
 

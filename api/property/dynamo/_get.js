@@ -2,7 +2,7 @@ import * as dynamoDbLib from "../../../libs/dynamodb-lib";
 import { success, failure } from "../../../libs/response-lib";
 import AWS from "aws-sdk";
 AWS.config.update({ region: "us-east-1" });
-var p_result ; var l_result;
+var p_result; var l_result;
 
 export async function getpropertyById(event, context, callback) {
     const params = {
@@ -26,9 +26,10 @@ export async function getpropertyById(event, context, callback) {
 
         await getlandlord(event.pathParameters.p_id);
 
-        await getcomplaints (p_result.Items[0].P_Address_Line1);
-       
-    
+        await getcomplaints(p_result.Items[0].P_Address_Line1);
+
+        await getRental(event.pathParameters.p_id);
+
 
         callback(null, success(p_result));
     } catch (e) {
@@ -106,37 +107,51 @@ async function getlandlord(p_id) {
         queryOptions: "{'fields':['l_properties']}"
     };
     var listOfObject = [];
-    try {
-        var data = await csd.search(params).promise();
-        console.log(data);
-        var i = 0;
+    var P_Landlords = []
+        ; try {
+            var data = await csd.search(params).promise();
+            console.log(data);
+            var i = 0;
 
-        while (i < data.hits.hit.length) {
-            var obj = JSON.parse(JSON.stringify(data.hits.hit[i].fields).replace(/[\[\]']+/g, ''));
-            listOfObject.push(obj);
-            i++;
-        }
-        console.log(listOfObject);
-        const l_params = {
-            TableName: 'Landlord',
-            KeyConditionExpression: "L_ID = :l_id",
-            ExpressionAttributeValues: {
-                ":l_id": listOfObject[0].l_id
+            while (i < data.hits.hit.length) {
+                var obj = JSON.parse(JSON.stringify(data.hits.hit[i].fields).replace(/[\[\]']+/g, ''));
+                listOfObject.push(obj);
+                i++;
             }
-        };
-        console.log(listOfObject[0].l_id);
-        //get landlord data
-         l_result = await dynamoDbLib.call("query", l_params);
-        console.log("First Step ", l_result);
+            console.log(listOfObject);
 
-       
-         console.log("second Step get Landlord Review");
-         await getlandlordReviews(listOfObject[0].l_id);
+            for (let v_landlord of listOfObject) {
+                var p_land;
+                const l_params = {
+                    TableName: 'Landlord',
+                    KeyConditionExpression: "L_ID = :l_id",
+                    ExpressionAttributeValues: {
+                        ":l_id": v_landlord.l_id
+                    }
+                };
+                console.log(v_landlord.l_id);
+                //get landlord data
+                l_result = await dynamoDbLib.call("query", l_params);
+                console.log("First Step ", l_result);
 
-        console.log("getlandlord ended successfully!!!! ");
-        p_result.Items[0].landlord = l_result.Items[0];
-      
-    }
+
+                console.log("second Step get Landlord Review");
+                var landlordReviews = await getlandlordReviews(v_landlord.l_id);
+
+                p_land =  l_result.Items[0] ;
+                p_land.Landlord_Reviews = landlordReviews != undefined ? landlordReviews.Landlord_Reviews : [];
+                p_land.L_Response_Rate =  landlordReviews != undefined ?landlordReviews.L_Response_Rate : 0;
+                p_land.L_Avg_Rating =  landlordReviews != undefined ? landlordReviews.L_Avg_Rating : 0;
+                p_land.L_Approval_Rate =  landlordReviews != undefined ?landlordReviews.L_Approval_Rate:0;
+                p_land.LR_Repair_Requests =  landlordReviews != undefined ? landlordReviews.LR_Repair_Requests : 0;
+
+                P_Landlords.push(p_land);
+
+            }
+            p_result.Items[0].P_Landlords = P_Landlords;
+            console.log("getlandlord ended successfully!!!! ");
+
+        }
     catch (err) {
         console.log(err, err.stack); // an error occurred
         return err;
@@ -157,15 +172,16 @@ async function getlandlordReviews(l_id) {
             ":l_ID": l_id
         }
     };
-
+   
     try {
         var Review = await dynamoDbLib.call("scan", L_ReviewsParams);
 
         var l_recommended = 0, l_approval = 0;
         var ReviewResponseList = [];
-
+   
         //Compute AVG
         if (Review.Count > 0) {
+
             console.log("compute step");
 
             for (let item of Review.Items) {
@@ -204,34 +220,40 @@ async function getlandlordReviews(l_id) {
                     console.log("Tenent Data ", Tenant);
                 }
                 //prepare review Response
-                console.log(item);
+                //console.log(item);
                 var ReviewResponse = {
-                    'LR_Title': item.LR_Title != null  ?item.LR_Title : '' ,
-                    'LR_Types': item.LR_Types != null  ? item.LR_Types : '',
+                    'LR_Title': item.LR_Title != null ? item.LR_Title : '',
+                    'LR_Types': item.LR_Types != null ? item.LR_Types : '',
                     'LR_Created_Date': item.LR_Created_On != null ? item.LR_Created_On : '',
                     'LR_Rating': item.LR_Rating != null ? item.LR_Created_On : '',
                     'LR_Responsiveness': item.LR_Responsiveness,
                     'LR_Repair_Requests': item.LR_Repair_Requests,
                     'LR_Approval': item.LR_Approval,
-                    'T_City': Tenant != null ? Tenant.Items[0].T_City : ' ',
-                    'T_State': Tenant != null ? Tenant.Items[0].T_State : ' '
+                    'T_City': Tenant.Count > 0 ? Tenant.Items[0].T_City : ' ',
+                    'T_State':Tenant.Count > 0 ? Tenant.Items[0].T_State : ' '
                 };
+
+                console.log(ReviewResponse);
                 ReviewResponseList = ReviewResponseList.concat(ReviewResponse);
             }
-        }
-
-        l_result.Items[0].Landlord_Reviews = ReviewResponseList.length > 0 ? ReviewResponseList : [];
-
-
+            console.log("done loop");
+    
+        var v_reponse = new Object(); 
+ 
+        v_reponse.Landlord_Reviews = ReviewResponseList.length > 0 ? ReviewResponseList : [];
+        console.log(v_reponse.Landlord_Reviews);
+        v_reponse.L_Response_Rate = isNaN(L_Response_Rate / Review.Count) ? 0 : L_Response_Rate / Review.Count;
+        v_reponse.L_Avg_Rating = isNaN(L_Avg_Rating / Review.Count) ? 0 : L_Avg_Rating / Review.Count;
+        v_reponse.L_Approval_Rate = isNaN(l_approval / Review.Count) ? 0 : l_approval / Review.Count;
+        v_reponse.LR_Repair_Requests = isNaN(LR_Repair_Requests / Review.Count) ? 0 : LR_Repair_Requests / Review.Count;
         // set the avg variable
-        l_result.Items[0].L_Response_Rate = isNaN(L_Response_Rate / Review.Count) ? 0 : L_Response_Rate / Review.Count;
-        l_result.Items[0].L_Avg_Rating = isNaN(L_Avg_Rating / Review.Count) ? 0 : L_Avg_Rating / Review.Count;
-        l_result.Items[0].L_Approval_Rate = isNaN(l_approval / Review.Count) ? 0 : l_approval / Review.Count;
-        l_result.Items[0].LR_Repair_Requests = isNaN(LR_Repair_Requests / Review.Count) ? 0 : LR_Repair_Requests / Review.Count;
+        console.log(v_reponse);
+        } 
         console.log("getlandlordReviews ended successfully !!!")
-
+        return v_reponse;
     }
     catch (err) {
+        console.log(err);
         return err;
     }
 }
@@ -260,20 +282,50 @@ async function getcomplaints(p_address) {
             i++;
         }
         console.log(listOfObject);
-        
-        var l_complaints = [] ;
-        for( let comp of listOfObject)
-        {
+
+        var p_complaints = [];
+        for (let comp of listOfObject) {
             console.log(comp.c_id);
-            l_complaints.push(comp.c_id);
+            p_complaints.push(comp.c_id);
         }
 
-        p_result.Items[0].L_Complaints = l_complaints ;
+        p_result.Items[0].P_Complaints = p_complaints;
 
         console.log("getcomplaintsObj ended successfully!!!! ");
     }
     catch (err) {
         console.log(err, err.stack); // an error occurred
+        return err;
+    }
+}
+
+async function getRental(p_id) {
+    console.log("getRental begin !!!!")
+    const P_Rental_Param = {
+        TableName: 'rv_rental',
+        FilterExpression: "R_P_ID = :P_ID",
+        ExpressionAttributeValues: {
+            ":P_ID": p_id
+        }
+    };
+
+    try {
+
+        var Rental = await dynamoDbLib.call("scan", P_Rental_Param);
+        let rentals = [];
+
+        if (Rental.Count > 0) {
+
+            for (let r of Rental.Items) {
+                rentals.push(r.rental_id)
+            }
+        }
+        p_result.Items[0].P_Rentals = Rental.Count > 0 ? rentals : [];
+        console.log("getRental ended successfully !!!!")
+    }
+
+    catch (err) {
+        console.log(err);
         return err;
     }
 }
