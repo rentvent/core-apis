@@ -32,36 +32,20 @@ export async function submiteQuestionnaire(event, context, callback) {
             LR_Created_On: format.asString(new Date()),
             LR_Updated_On: format.asString(new Date()),
             T_City: ' ',
-            T_State: ' '
+            T_State: ' ',
+            LR_Start_Date :data.Q_Movein_Date,
+            LR_End_Date :data.Q_Moveout_Date,
         }
 
     };
 
-    var Rentalparamscreate = {
-        TableName: "rv_rental",
-        Item: {
-            rental_id: uuid.v1(),
-            R_Price: data.Q_Rental_Rate,
-            R_Start_Date :data.P_Q_Movein_Date,
-            R_End_Date :data.P_Q_Moveout_Dat,
-            R_Tenants: data.tenant_id,
-            R_Deposit_Required: data.P_Q_Security_Required,
-            R_Annual_Increase: data.P_Q_RR_Increase,
-            R_Application_Fee: data.P_Q_Application_Fee_Required,
-            R_Renters_Insurance: data.P_Q_Insurance,
-            R_Created_By: "Questionnaire",
-            R_Updated_By: "Questionnaire",
-            R_Created_On: format.asString(new Date()),
-            R_Updated_On: format.asString(new Date()),
-            R_P_ID : data.propertyID,
-        }
-    };
+    
 
-
+    var pr_id = uuid.v1();
     var propertyReveiwParams = {
         TableName: "Property_Reviews",
         Item: {
-            PR_ID: uuid.v1(),
+            PR_ID: pr_id,
             PR_T_ID: data.tenant_id,
             P_ID : data.propertyID,
             PR_Types : data.PR_Types ,
@@ -75,6 +59,26 @@ export async function submiteQuestionnaire(event, context, callback) {
             PR_Updated_On:format.asString(new Date())
         }
     }
+
+    var Rentalparamscreate = {
+        TableName: "rv_rental",
+        Item: {
+            rental_id: uuid.v1(),
+            R_Price: data.Q_Rental_Rate,
+            R_Start_Date :data.Q_Movein_Date,
+            R_End_Date :data.Q_Moveout_Date,
+            R_Tenants: data.tenant_id,
+            R_Deposit_Required: data.P_Q_Security_Required,
+            R_Annual_Increase: data.P_Q_RR_Increase,
+            R_Application_Fee: data.P_Q_Application_Fee_Required,
+            R_Renters_Insurance: data.P_Q_Insurance,
+            R_Created_By: "Questionnaire",
+            R_Updated_By: "Questionnaire",
+            R_Created_On: format.asString(new Date()),
+            R_Updated_On: format.asString(new Date()),
+            PR_ID :pr_id
+        }
+    };
 
     try {
         if (data.Q_Type == "P") {

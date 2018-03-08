@@ -28,9 +28,6 @@ export async function getpropertyById(event, context, callback) {
 
         await getcomplaints(p_result.Items[0].P_Address_Line1);
 
-        await getRental(event.pathParameters.p_id);
-
-
         callback(null, success(p_result));
     } catch (e) {
         callback(null, failure(e));
@@ -68,14 +65,17 @@ async function getPropertyReview(p_id) {
                     Tenant = await dynamoDbLib.call("scan", TenantParams);
                     console.log("Tenent Data ", Tenant);
                 }
+                var p_rental = await getRental(item.PR_ID);
+                console.log("p_rental", p_rental);
                 var reviewResponse = {
                     "T_City": '', //Tenant != null ? Tenant.Items[0].T_City : ' ',
                     "T_State": '',//Tenant != null ? Tenant.Items[0].T_State : ' ',
                     "PR_Types": item.PR_Types,
                     "PR_Created_Date": item.PR_Created_Date,
-                    "PR_Condition":item.PR_Condition,
-                    "PR_Approval":item.PR_Approval,
-                    "PR_Rating":item.PR_Rating
+                    "PR_Condition": item.PR_Condition,
+                    "PR_Approval": item.PR_Approval,
+                    "PR_Rating": item.PR_Rating,
+                    "PR_Renatl": p_rental
                 }
 
                 //compute step
@@ -141,12 +141,12 @@ async function getlandlord(p_id) {
                 console.log("second Step get Landlord Review");
                 var landlordReviews = await getlandlordReviews(v_landlord.l_id);
 
-                p_land =  l_result.Items[0] ;
+                p_land = l_result.Items[0];
                 p_land.Landlord_Reviews = landlordReviews != undefined ? landlordReviews.Landlord_Reviews : [];
-                p_land.L_Response_Rate =  landlordReviews != undefined ?landlordReviews.L_Response_Rate : 0;
-                p_land.L_Avg_Rating =  landlordReviews != undefined ? landlordReviews.L_Avg_Rating : 0;
-                p_land.L_Approval_Rate =  landlordReviews != undefined ?landlordReviews.L_Approval_Rate:0;
-                p_land.LR_Repair_Requests =  landlordReviews != undefined ? landlordReviews.LR_Repair_Requests : 0;
+                p_land.L_Response_Rate = landlordReviews != undefined ? landlordReviews.L_Response_Rate : 0;
+                p_land.L_Avg_Rating = landlordReviews != undefined ? landlordReviews.L_Avg_Rating : 0;
+                p_land.L_Approval_Rate = landlordReviews != undefined ? landlordReviews.L_Approval_Rate : 0;
+                p_land.LR_Repair_Requests = landlordReviews != undefined ? landlordReviews.LR_Repair_Requests : 0;
 
                 P_Landlords.push(p_land);
 
@@ -175,13 +175,13 @@ async function getlandlordReviews(l_id) {
             ":l_ID": l_id
         }
     };
-   
+
     try {
         var Review = await dynamoDbLib.call("scan", L_ReviewsParams);
 
         var l_recommended = 0, l_approval = 0;
         var ReviewResponseList = [];
-   
+
         //Compute AVG
         if (Review.Count > 0) {
 
@@ -233,25 +233,25 @@ async function getlandlordReviews(l_id) {
                     'LR_Repair_Requests': item.LR_Repair_Requests,
                     'LR_Approval': item.LR_Approval,
                     'T_City': Tenant.Count > 0 ? Tenant.Items[0].T_City : ' ',
-                    'T_State':Tenant.Count > 0 ? Tenant.Items[0].T_State : ' '
+                    'T_State': Tenant.Count > 0 ? Tenant.Items[0].T_State : ' '
                 };
 
                 console.log(ReviewResponse);
                 ReviewResponseList = ReviewResponseList.concat(ReviewResponse);
             }
             console.log("done loop");
-    
-        var v_reponse = new Object(); 
- 
-        v_reponse.Landlord_Reviews = ReviewResponseList.length > 0 ? ReviewResponseList : [];
-        console.log(v_reponse.Landlord_Reviews);
-        v_reponse.L_Response_Rate = isNaN(L_Response_Rate / Review.Count) ? 0 : L_Response_Rate / Review.Count;
-        v_reponse.L_Avg_Rating = isNaN(L_Avg_Rating / Review.Count) ? 0 : L_Avg_Rating / Review.Count;
-        v_reponse.L_Approval_Rate = isNaN(l_approval / Review.Count) ? 0 : l_approval / Review.Count;
-        v_reponse.LR_Repair_Requests = isNaN(LR_Repair_Requests / Review.Count) ? 0 : LR_Repair_Requests / Review.Count;
-        // set the avg variable
-        console.log(v_reponse);
-        } 
+
+            var v_reponse = new Object();
+
+            v_reponse.Landlord_Reviews = ReviewResponseList.length > 0 ? ReviewResponseList : [];
+            console.log(v_reponse.Landlord_Reviews);
+            v_reponse.L_Response_Rate = isNaN(L_Response_Rate / Review.Count) ? 0 : L_Response_Rate / Review.Count;
+            v_reponse.L_Avg_Rating = isNaN(L_Avg_Rating / Review.Count) ? 0 : L_Avg_Rating / Review.Count;
+            v_reponse.L_Approval_Rate = isNaN(l_approval / Review.Count) ? 0 : l_approval / Review.Count;
+            v_reponse.LR_Repair_Requests = isNaN(LR_Repair_Requests / Review.Count) ? 0 : LR_Repair_Requests / Review.Count;
+            // set the avg variable
+            console.log(v_reponse);
+        }
         console.log("getlandlordReviews ended successfully !!!")
         return v_reponse;
     }
@@ -302,13 +302,13 @@ async function getcomplaints(p_address) {
     }
 }
 
-async function getRental(p_id) {
+async function getRental(pr_id) {
     console.log("getRental begin !!!!")
     const P_Rental_Param = {
         TableName: 'rv_rental',
-        FilterExpression: "R_P_ID = :P_ID",
+        FilterExpression: "PR_ID = :PR_ID",
         ExpressionAttributeValues: {
-            ":P_ID": p_id
+            ":PR_ID": pr_id
         }
     };
 
@@ -320,11 +320,11 @@ async function getRental(p_id) {
         if (Rental.Count > 0) {
 
             for (let r of Rental.Items) {
-                rentals.push({"R_ID":r.rental_id})
+                rentals.push({ "R_ID": r.rental_id })
             }
         }
-        p_result.Items[0].P_Rentals = Rental.Count > 0 ? rentals : [];
         console.log("getRental ended successfully !!!!")
+        return rentals;
     }
 
     catch (err) {
