@@ -72,7 +72,10 @@ async function getPropertyReview(p_id) {
                     "T_City": '', //Tenant != null ? Tenant.Items[0].T_City : ' ',
                     "T_State": '',//Tenant != null ? Tenant.Items[0].T_State : ' ',
                     "PR_Types": item.PR_Types,
-                    "PR_Created_Date": item.PR_Created_Date
+                    "PR_Created_Date": item.PR_Created_Date,
+                    "PR_Condition":item.PR_Condition,
+                    "PR_Approval":item.PR_Approval,
+                    "PR_Rating":item.PR_Rating
                 }
 
                 //compute step
@@ -317,7 +320,7 @@ async function getRental(p_id) {
         if (Rental.Count > 0) {
 
             for (let r of Rental.Items) {
-                rentals.push(r.rental_id)
+                rentals.push({"R_ID":r.rental_id})
             }
         }
         p_result.Items[0].P_Rentals = Rental.Count > 0 ? rentals : [];

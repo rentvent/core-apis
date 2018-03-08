@@ -155,23 +155,27 @@ var getpropertyById = exports.getpropertyById = function () {
                         return getcomplaints(p_result.Items[0].P_Address_Line1);
 
                     case 16:
+                        _context.next = 18;
+                        return getRental(event.pathParameters.p_id);
+
+                    case 18:
 
                         callback(null, (0, _responseLib.success)(p_result));
-                        _context.next = 22;
+                        _context.next = 24;
                         break;
 
-                    case 19:
-                        _context.prev = 19;
+                    case 21:
+                        _context.prev = 21;
                         _context.t0 = _context["catch"](1);
 
                         callback(null, (0, _responseLib.failure)(_context.t0));
 
-                    case 22:
+                    case 24:
                     case "end":
                         return _context.stop();
                 }
             }
-        }, _callee, this, [[1, 19]]);
+        }, _callee, this, [[1, 21]]);
     }));
 
     return function getpropertyById(_x, _x2, _x3) {
@@ -252,7 +256,10 @@ var getPropertyReview = function () {
                             "T_City": '', //Tenant != null ? Tenant.Items[0].T_City : ' ',
                             "T_State": '', //Tenant != null ? Tenant.Items[0].T_State : ' ',
                             "PR_Types": item.PR_Types,
-                            "PR_Created_Date": item.PR_Created_Date
+                            "PR_Created_Date": item.PR_Created_Date,
+                            "PR_Condition": item.PR_Condition,
+                            "PR_Approval": item.PR_Approval,
+                            "PR_Rating": item.PR_Rating
 
                             //compute step
                         };
@@ -332,7 +339,8 @@ var getPropertyReview = function () {
 
 var getlandlord = function () {
     var _ref3 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee3(p_id) {
-        var csd, params, listOfObject, data, i, obj, l_params;
+        var csd, params, listOfObject, P_Landlords, data, i, obj, _iteratorNormalCompletion2, _didIteratorError2, _iteratorError2, _iterator2, _step2, v_landlord, p_land, l_params, landlordReviews;
+
         return _regenerator2.default.wrap(function _callee3$(_context3) {
             while (1) {
                 switch (_context3.prev = _context3.next) {
@@ -348,11 +356,12 @@ var getlandlord = function () {
                             queryOptions: "{'fields':['l_properties']}"
                         };
                         listOfObject = [];
-                        _context3.prev = 5;
-                        _context3.next = 8;
+                        P_Landlords = [];
+                        _context3.prev = 6;
+                        _context3.next = 9;
                         return csd.search(params).promise();
 
-                    case 8:
+                    case 9:
                         data = _context3.sent;
 
                         console.log(data);
@@ -366,49 +375,114 @@ var getlandlord = function () {
                             i++;
                         }
                         console.log(listOfObject);
+
+                        _iteratorNormalCompletion2 = true;
+                        _didIteratorError2 = false;
+                        _iteratorError2 = undefined;
+                        _context3.prev = 17;
+                        _iterator2 = (0, _getIterator3.default)(listOfObject);
+
+                    case 19:
+                        if (_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done) {
+                            _context3.next = 41;
+                            break;
+                        }
+
+                        v_landlord = _step2.value;
                         l_params = {
                             TableName: 'Landlord',
                             KeyConditionExpression: "L_ID = :l_id",
                             ExpressionAttributeValues: {
-                                ":l_id": listOfObject[0].l_id
+                                ":l_id": v_landlord.l_id
                             }
                         };
 
-                        console.log(listOfObject[0].l_id);
+                        console.log(v_landlord.l_id);
                         //get landlord data
-                        _context3.next = 17;
+                        _context3.next = 25;
                         return dynamoDbLib.call("query", l_params);
 
-                    case 17:
+                    case 25:
                         l_result = _context3.sent;
 
                         console.log("First Step ", l_result);
 
                         console.log("second Step get Landlord Review");
-                        _context3.next = 22;
-                        return getlandlordReviews(listOfObject[0].l_id);
-
-                    case 22:
-
-                        console.log("getlandlord ended successfully!!!! ");
-                        p_result.Items[0].landlord = l_result.Items[0];
-
                         _context3.next = 30;
-                        break;
-
-                    case 26:
-                        _context3.prev = 26;
-                        _context3.t0 = _context3["catch"](5);
-
-                        console.log(_context3.t0, _context3.t0.stack); // an error occurred
-                        return _context3.abrupt("return", _context3.t0);
+                        return getlandlordReviews(v_landlord.l_id);
 
                     case 30:
+                        landlordReviews = _context3.sent;
+
+
+                        p_land = l_result.Items[0];
+                        p_land.Landlord_Reviews = landlordReviews != undefined ? landlordReviews.Landlord_Reviews : [];
+                        p_land.L_Response_Rate = landlordReviews != undefined ? landlordReviews.L_Response_Rate : 0;
+                        p_land.L_Avg_Rating = landlordReviews != undefined ? landlordReviews.L_Avg_Rating : 0;
+                        p_land.L_Approval_Rate = landlordReviews != undefined ? landlordReviews.L_Approval_Rate : 0;
+                        p_land.LR_Repair_Requests = landlordReviews != undefined ? landlordReviews.LR_Repair_Requests : 0;
+
+                        P_Landlords.push(p_land);
+
+                    case 38:
+                        _iteratorNormalCompletion2 = true;
+                        _context3.next = 19;
+                        break;
+
+                    case 41:
+                        _context3.next = 47;
+                        break;
+
+                    case 43:
+                        _context3.prev = 43;
+                        _context3.t0 = _context3["catch"](17);
+                        _didIteratorError2 = true;
+                        _iteratorError2 = _context3.t0;
+
+                    case 47:
+                        _context3.prev = 47;
+                        _context3.prev = 48;
+
+                        if (!_iteratorNormalCompletion2 && _iterator2.return) {
+                            _iterator2.return();
+                        }
+
+                    case 50:
+                        _context3.prev = 50;
+
+                        if (!_didIteratorError2) {
+                            _context3.next = 53;
+                            break;
+                        }
+
+                        throw _iteratorError2;
+
+                    case 53:
+                        return _context3.finish(50);
+
+                    case 54:
+                        return _context3.finish(47);
+
+                    case 55:
+                        p_result.Items[0].P_Landlords = P_Landlords;
+                        console.log("getlandlord ended successfully!!!! ");
+
+                        _context3.next = 63;
+                        break;
+
+                    case 59:
+                        _context3.prev = 59;
+                        _context3.t1 = _context3["catch"](6);
+
+                        console.log(_context3.t1, _context3.t1.stack); // an error occurred
+                        return _context3.abrupt("return", _context3.t1);
+
+                    case 63:
                     case "end":
                         return _context3.stop();
                 }
             }
-        }, _callee3, this, [[5, 26]]);
+        }, _callee3, this, [[6, 59], [17, 43, 47, 55], [48,, 50, 54]]);
     }));
 
     return function getlandlord(_x5) {
@@ -418,7 +492,7 @@ var getlandlord = function () {
 
 var getlandlordReviews = function () {
     var _ref4 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee4(l_id) {
-        var L_Avg_Rating, L_Approval_Rate, LR_Repair_Requests, L_Response_Rate, L_Recommended_Rate, L_ReviewsParams, Review, l_recommended, l_approval, ReviewResponseList, _iteratorNormalCompletion2, _didIteratorError2, _iteratorError2, _iterator2, _step2, item, Tenant, TenantParams, ReviewResponse;
+        var L_Avg_Rating, L_Approval_Rate, LR_Repair_Requests, L_Response_Rate, L_Recommended_Rate, L_ReviewsParams, Review, l_recommended, l_approval, ReviewResponseList, _iteratorNormalCompletion3, _didIteratorError3, _iteratorError3, _iterator3, _step3, item, Tenant, TenantParams, ReviewResponse, v_reponse;
 
         return _regenerator2.default.wrap(function _callee4$(_context4) {
             while (1) {
@@ -450,25 +524,25 @@ var getlandlordReviews = function () {
                         //Compute AVG
 
                         if (!(Review.Count > 0)) {
-                            _context4.next = 62;
+                            _context4.next = 71;
                             break;
                         }
 
                         console.log("compute step");
 
-                        _iteratorNormalCompletion2 = true;
-                        _didIteratorError2 = false;
-                        _iteratorError2 = undefined;
+                        _iteratorNormalCompletion3 = true;
+                        _didIteratorError3 = false;
+                        _iteratorError3 = undefined;
                         _context4.prev = 18;
-                        _iterator2 = (0, _getIterator3.default)(Review.Items);
+                        _iterator3 = (0, _getIterator3.default)(Review.Items);
 
                     case 20:
-                        if (_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done) {
+                        if (_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done) {
                             _context4.next = 48;
                             break;
                         }
 
-                        item = _step2.value;
+                        item = _step3.value;
 
 
                         console.log("compute step2 ", item);
@@ -516,7 +590,7 @@ var getlandlordReviews = function () {
 
                     case 42:
                         //prepare review Response
-                        console.log(item);
+                        //console.log(item);
                         ReviewResponse = {
                             'LR_Title': item.LR_Title != null ? item.LR_Title : '',
                             'LR_Types': item.LR_Types != null ? item.LR_Types : '',
@@ -525,14 +599,16 @@ var getlandlordReviews = function () {
                             'LR_Responsiveness': item.LR_Responsiveness,
                             'LR_Repair_Requests': item.LR_Repair_Requests,
                             'LR_Approval': item.LR_Approval,
-                            'T_City': Tenant != null ? Tenant.Items[0].T_City : ' ',
-                            'T_State': Tenant != null ? Tenant.Items[0].T_State : ' '
+                            'T_City': Tenant.Count > 0 ? Tenant.Items[0].T_City : ' ',
+                            'T_State': Tenant.Count > 0 ? Tenant.Items[0].T_State : ' '
                         };
 
+
+                        console.log(ReviewResponse);
                         ReviewResponseList = ReviewResponseList.concat(ReviewResponse);
 
                     case 45:
-                        _iteratorNormalCompletion2 = true;
+                        _iteratorNormalCompletion3 = true;
                         _context4.next = 20;
                         break;
 
@@ -543,26 +619,26 @@ var getlandlordReviews = function () {
                     case 50:
                         _context4.prev = 50;
                         _context4.t0 = _context4["catch"](18);
-                        _didIteratorError2 = true;
-                        _iteratorError2 = _context4.t0;
+                        _didIteratorError3 = true;
+                        _iteratorError3 = _context4.t0;
 
                     case 54:
                         _context4.prev = 54;
                         _context4.prev = 55;
 
-                        if (!_iteratorNormalCompletion2 && _iterator2.return) {
-                            _iterator2.return();
+                        if (!_iteratorNormalCompletion3 && _iterator3.return) {
+                            _iterator3.return();
                         }
 
                     case 57:
                         _context4.prev = 57;
 
-                        if (!_didIteratorError2) {
+                        if (!_didIteratorError3) {
                             _context4.next = 60;
                             break;
                         }
 
-                        throw _iteratorError2;
+                        throw _iteratorError3;
 
                     case 60:
                         return _context4.finish(57);
@@ -571,30 +647,37 @@ var getlandlordReviews = function () {
                         return _context4.finish(54);
 
                     case 62:
+                        console.log("done loop");
 
-                        l_result.Items[0].Landlord_Reviews = ReviewResponseList.length > 0 ? ReviewResponseList : [];
+                        v_reponse = new Object();
 
+
+                        v_reponse.Landlord_Reviews = ReviewResponseList.length > 0 ? ReviewResponseList : [];
+                        console.log(v_reponse.Landlord_Reviews);
+                        v_reponse.L_Response_Rate = isNaN(L_Response_Rate / Review.Count) ? 0 : L_Response_Rate / Review.Count;
+                        v_reponse.L_Avg_Rating = isNaN(L_Avg_Rating / Review.Count) ? 0 : L_Avg_Rating / Review.Count;
+                        v_reponse.L_Approval_Rate = isNaN(l_approval / Review.Count) ? 0 : l_approval / Review.Count;
+                        v_reponse.LR_Repair_Requests = isNaN(LR_Repair_Requests / Review.Count) ? 0 : LR_Repair_Requests / Review.Count;
                         // set the avg variable
-                        l_result.Items[0].L_Response_Rate = isNaN(L_Response_Rate / Review.Count) ? 0 : L_Response_Rate / Review.Count;
-                        l_result.Items[0].L_Avg_Rating = isNaN(L_Avg_Rating / Review.Count) ? 0 : L_Avg_Rating / Review.Count;
-                        l_result.Items[0].L_Approval_Rate = isNaN(l_approval / Review.Count) ? 0 : l_approval / Review.Count;
-                        l_result.Items[0].LR_Repair_Requests = isNaN(LR_Repair_Requests / Review.Count) ? 0 : LR_Repair_Requests / Review.Count;
+                        console.log(v_reponse);
+
+                    case 71:
                         console.log("getlandlordReviews ended successfully !!!");
+                        return _context4.abrupt("return", v_reponse);
 
-                        _context4.next = 73;
-                        break;
-
-                    case 70:
-                        _context4.prev = 70;
+                    case 75:
+                        _context4.prev = 75;
                         _context4.t1 = _context4["catch"](7);
+
+                        console.log(_context4.t1);
                         return _context4.abrupt("return", _context4.t1);
 
-                    case 73:
+                    case 79:
                     case "end":
                         return _context4.stop();
                 }
             }
-        }, _callee4, this, [[7, 70], [18, 50, 54, 62], [55,, 57, 61]]);
+        }, _callee4, this, [[7, 75], [18, 50, 54, 62], [55,, 57, 61]]);
     }));
 
     return function getlandlordReviews(_x6) {
@@ -604,7 +687,7 @@ var getlandlordReviews = function () {
 
 var getcomplaints = function () {
     var _ref5 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee5(p_address) {
-        var csd, params, listOfObject, data, i, obj, l_complaints, _iteratorNormalCompletion3, _didIteratorError3, _iteratorError3, _iterator3, _step3, comp;
+        var csd, params, listOfObject, data, i, obj, p_complaints, _iteratorNormalCompletion4, _didIteratorError4, _iteratorError4, _iterator4, _step4, comp;
 
         return _regenerator2.default.wrap(function _callee5$(_context5) {
             while (1) {
@@ -641,17 +724,17 @@ var getcomplaints = function () {
                         }
                         console.log(listOfObject);
 
-                        l_complaints = [];
-                        _iteratorNormalCompletion3 = true;
-                        _didIteratorError3 = false;
-                        _iteratorError3 = undefined;
+                        p_complaints = [];
+                        _iteratorNormalCompletion4 = true;
+                        _didIteratorError4 = false;
+                        _iteratorError4 = undefined;
                         _context5.prev = 17;
 
-                        for (_iterator3 = (0, _getIterator3.default)(listOfObject); !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
-                            comp = _step3.value;
+                        for (_iterator4 = (0, _getIterator3.default)(listOfObject); !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
+                            comp = _step4.value;
 
                             console.log(comp.c_id);
-                            l_complaints.push(comp.c_id);
+                            p_complaints.push(comp.c_id);
                         }
 
                         _context5.next = 25;
@@ -660,26 +743,26 @@ var getcomplaints = function () {
                     case 21:
                         _context5.prev = 21;
                         _context5.t0 = _context5["catch"](17);
-                        _didIteratorError3 = true;
-                        _iteratorError3 = _context5.t0;
+                        _didIteratorError4 = true;
+                        _iteratorError4 = _context5.t0;
 
                     case 25:
                         _context5.prev = 25;
                         _context5.prev = 26;
 
-                        if (!_iteratorNormalCompletion3 && _iterator3.return) {
-                            _iterator3.return();
+                        if (!_iteratorNormalCompletion4 && _iterator4.return) {
+                            _iterator4.return();
                         }
 
                     case 28:
                         _context5.prev = 28;
 
-                        if (!_didIteratorError3) {
+                        if (!_didIteratorError4) {
                             _context5.next = 31;
                             break;
                         }
 
-                        throw _iteratorError3;
+                        throw _iteratorError4;
 
                     case 31:
                         return _context5.finish(28);
@@ -688,7 +771,7 @@ var getcomplaints = function () {
                         return _context5.finish(25);
 
                     case 33:
-                        p_result.Items[0].L_Complaints = l_complaints;
+                        p_result.Items[0].P_Complaints = p_complaints;
 
                         console.log("getcomplaintsObj ended successfully!!!! ");
                         _context5.next = 41;
@@ -711,6 +794,105 @@ var getcomplaints = function () {
 
     return function getcomplaints(_x7) {
         return _ref5.apply(this, arguments);
+    };
+}();
+
+var getRental = function () {
+    var _ref6 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee6(p_id) {
+        var P_Rental_Param, Rental, rentals, _iteratorNormalCompletion5, _didIteratorError5, _iteratorError5, _iterator5, _step5, r;
+
+        return _regenerator2.default.wrap(function _callee6$(_context6) {
+            while (1) {
+                switch (_context6.prev = _context6.next) {
+                    case 0:
+                        console.log("getRental begin !!!!");
+                        P_Rental_Param = {
+                            TableName: 'rv_rental',
+                            FilterExpression: "R_P_ID = :P_ID",
+                            ExpressionAttributeValues: {
+                                ":P_ID": p_id
+                            }
+                        };
+                        _context6.prev = 2;
+                        _context6.next = 5;
+                        return dynamoDbLib.call("scan", P_Rental_Param);
+
+                    case 5:
+                        Rental = _context6.sent;
+                        rentals = [];
+
+                        if (!(Rental.Count > 0)) {
+                            _context6.next = 27;
+                            break;
+                        }
+
+                        _iteratorNormalCompletion5 = true;
+                        _didIteratorError5 = false;
+                        _iteratorError5 = undefined;
+                        _context6.prev = 11;
+
+
+                        for (_iterator5 = (0, _getIterator3.default)(Rental.Items); !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
+                            r = _step5.value;
+
+                            rentals.push({ "R_ID": r.rental_id });
+                        }
+                        _context6.next = 19;
+                        break;
+
+                    case 15:
+                        _context6.prev = 15;
+                        _context6.t0 = _context6["catch"](11);
+                        _didIteratorError5 = true;
+                        _iteratorError5 = _context6.t0;
+
+                    case 19:
+                        _context6.prev = 19;
+                        _context6.prev = 20;
+
+                        if (!_iteratorNormalCompletion5 && _iterator5.return) {
+                            _iterator5.return();
+                        }
+
+                    case 22:
+                        _context6.prev = 22;
+
+                        if (!_didIteratorError5) {
+                            _context6.next = 25;
+                            break;
+                        }
+
+                        throw _iteratorError5;
+
+                    case 25:
+                        return _context6.finish(22);
+
+                    case 26:
+                        return _context6.finish(19);
+
+                    case 27:
+                        p_result.Items[0].P_Rentals = Rental.Count > 0 ? rentals : [];
+                        console.log("getRental ended successfully !!!!");
+                        _context6.next = 35;
+                        break;
+
+                    case 31:
+                        _context6.prev = 31;
+                        _context6.t1 = _context6["catch"](2);
+
+                        console.log(_context6.t1);
+                        return _context6.abrupt("return", _context6.t1);
+
+                    case 35:
+                    case "end":
+                        return _context6.stop();
+                }
+            }
+        }, _callee6, this, [[2, 31], [11, 15, 19, 27], [20,, 22, 26]]);
+    }));
+
+    return function getRental(_x8) {
+        return _ref6.apply(this, arguments);
     };
 }();
 
