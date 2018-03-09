@@ -5,7 +5,7 @@ import { success, failure } from "../../libs/response-lib";
 export async function getrental(event, context, callback) {
   const params = {
     TableName: 'rv_rental',
-    KeyConditionExpression: "rental_id = :r_id",
+    KeyConditionExpression: "R_ID = :r_id",
     
     ExpressionAttributeValues: {
             ":r_id":event.pathParameters.r_id

@@ -1,6 +1,7 @@
 import * as dynamoDbLib from "../../../libs/dynamodb-lib";
 import { success, failure } from "../../../libs/response-lib";
 import AWS from "aws-sdk";
+import { ENOTEMPTY } from "constants";
 AWS.config.update({ region: "us-east-1" });
 var p_result; var l_result;
 
@@ -53,7 +54,7 @@ async function getPropertyReview(p_id) {
             var reviewList = [];
             for (let item of Review.Items) {
 
-                var Tenant;
+               
                 if (item.PR_T_ID != null) {
                     var TenantParams = {
                         TableName: 'Tenant',
@@ -62,20 +63,22 @@ async function getPropertyReview(p_id) {
                             ":t_id": item.PR_T_ID
                         }
                     };
-                    Tenant = await dynamoDbLib.call("scan", TenantParams);
+                   var Tenant = await dynamoDbLib.call("scan", TenantParams);
                     console.log("Tenent Data ", Tenant);
                 }
                 var p_rental = await getRental(item.PR_ID);
                 console.log("p_rental", p_rental);
+                console.log(item);
                 var reviewResponse = {
-                    "T_City": '', //Tenant != null ? Tenant.Items[0].T_City : ' ',
-                    "T_State": '',//Tenant != null ? Tenant.Items[0].T_State : ' ',
+                    "T_City": Tenant.Count >0 ? Tenant.Items[0].T_City : ' ',
+                    "T_State": Tenant.Count >0? Tenant.Items[0].T_State : ' ',
                     "PR_Types": item.PR_Types,
+                    "PR_Title":item.PR_Title,
                     "PR_Created_Date": item.PR_Created_Date,
                     "PR_Condition": item.PR_Condition,
                     "PR_Approval": item.PR_Approval,
                     "PR_Rating": item.PR_Rating,
-                    "PR_Renatl": p_rental
+                    "PR_Rental": p_rental
                 }
 
                 //compute step
@@ -85,10 +88,11 @@ async function getPropertyReview(p_id) {
                 p_approval = p_approval + v_approval;
                 // console.log(item);
                 reviewList.push(reviewResponse)
+              //  console.log("reviewResponse",reviewResponse);
             }
             p_result.Items[0].P_Reviews = reviewList;
-            p_result.Items[0].P_Approval_Rate = p_approval + '/' + Review.Count;
-            p_result.Items[0].P_Avg_Rating = isNaN(p_rating / Review.Count) ? 0 : Math.trunc(p_rating / Review.Count);
+            p_result.Items[0].P_Approval_Rate = isNaN(p_approval / Review.Count) ? 0 :p_approval / Review.Count; 
+            p_result.Items[0].P_Avg_Rating = isNaN(p_rating / Review.Count) ? 0 : p_rating / Review.Count;
         }
         console.log("getPropertyReview ended successfully !!!!")
     }
@@ -192,14 +196,14 @@ async function getlandlordReviews(l_id) {
                 console.log("compute step2 ", item);
                 //het the value of each reviw
                 l_recommended = item.LR_Recommend;
-                l_approval = item.LR_Approval;
+              
 
                 //Convert the value of YES OR NO
                 l_recommended = l_recommended == 'yes' ? 1 : 0;
-                l_approval = l_approval == 'yes' ? 1 : 0;
+  
                 console.log("compute step3 ", l_recommended);
                 //YES oR NO
-                L_Approval_Rate = L_Approval_Rate + l_approval;
+    
                 L_Recommended_Rate = L_Recommended_Rate + l_recommended;
                 console.log("compute step4 ", L_Approval_Rate);
                 //Computation
@@ -247,7 +251,7 @@ async function getlandlordReviews(l_id) {
             console.log(v_reponse.Landlord_Reviews);
             v_reponse.L_Response_Rate = isNaN(L_Response_Rate / Review.Count) ? 0 : L_Response_Rate / Review.Count;
             v_reponse.L_Avg_Rating = isNaN(L_Avg_Rating / Review.Count) ? 0 : L_Avg_Rating / Review.Count;
-            v_reponse.L_Approval_Rate = isNaN(l_approval / Review.Count) ? 0 : l_approval / Review.Count;
+            v_reponse.L_Approval_Rate = isNaN(L_Recommended_Rate / Review.Count) ? 0 : L_Recommended_Rate / Review.Count;
             v_reponse.LR_Repair_Requests = isNaN(LR_Repair_Requests / Review.Count) ? 0 : LR_Repair_Requests / Review.Count;
             // set the avg variable
             console.log(v_reponse);
