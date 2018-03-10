@@ -194,8 +194,8 @@ export async function getProperties() {
                             }
                         }
                         //get property review 
-                        console.log("fifth Step get  prperties reviews");
-                        var propertiesReview = await getproprtyReview(item.p_id)
+                        console.log("fifth Step get  prperties reviews",item.P_ID);
+                        var propertiesReview = await getproprtyReview(item.P_ID)
 
                         // prepare property response
                         var propResponse = {
@@ -273,19 +273,21 @@ export async function getproprtyReview(p_id) {
             console.log("we have data  propertiesReview", propertiesReview.Items);
 
             //compute the avg rating for property
-            var p_review_count = 0;
-            while (propertiesReview.Count > p_review_count) {
-                sum_prop_avg = propertiesReview.Items[p_review_count].LR_Rating + sum_prop_avg;
-                p_review_count++;
+            console.log("before loop");
+            for(let pr_reveiw of propertiesReview.Items )
+            {
+                console.log("inside loop");
+                sum_prop_avg += pr_reveiw.PR_Rating
             }
         }
-        var avgReview = sum_prop_avg / propertiesReview.Count;
+        var avgReview = isNaN(sum_prop_avg / propertiesReview.Count) ? 0 : sum_prop_avg / propertiesReview.Count;
 
-        console.log("getproprtyReview ended successfully!!!! ");
-        return { 'avgReview': avgReview, 'count': propertiesReview.Count };
+        console.log("getproprtyReview ended successfully!!!! ", avgReview);
+        return { 'avgReview': avgReview, 'Count': propertiesReview.Count };
     }
     catch (err) {
         return err;
     }
 }
+
 

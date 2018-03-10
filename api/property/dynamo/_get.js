@@ -44,7 +44,7 @@ async function getPropertyReview(p_id) {
             ":p_id": p_id
         }
     };
-
+    let v_date, last_r_price = 0 , v_renatl_respone= [] ;
     try {
         var Review = await dynamoDbLib.call("scan", propertyparams);
         console.log("Review data ", Review);
@@ -54,7 +54,7 @@ async function getPropertyReview(p_id) {
             var reviewList = [];
             for (let item of Review.Items) {
 
-               
+
                 if (item.PR_T_ID != null) {
                     var TenantParams = {
                         TableName: 'Tenant',
@@ -63,22 +63,36 @@ async function getPropertyReview(p_id) {
                             ":t_id": item.PR_T_ID
                         }
                     };
-                   var Tenant = await dynamoDbLib.call("scan", TenantParams);
+                    var Tenant = await dynamoDbLib.call("scan", TenantParams);
                     console.log("Tenent Data ", Tenant);
                 }
                 var p_rental = await getRental(item.PR_ID);
-                console.log("p_rental", p_rental);
-                console.log(item);
+                console.log("p_rental retttt", p_rental[0]);
+
+
+                // compute last_rental_price GET all renatl and get which R_End_Date are the newest one to R_PRICE
+                //if we have reviews but we dont have rental data               
+                if( p_rental[0] != undefined)
+                    {
+                    console.log("rent data", p_rental[0].R_End_Date)
+                    if (v_date == undefined || v_date < new Date(p_rental[0].R_End_Date)) {
+                        console.log("current End Date value - vdate- ", v_date)
+                        v_date = new Date(p_rental[0].R_End_Date);
+                        last_r_price = p_rental[0].R_Price;
+                        console.log("current last_r_price value", last_r_price)
+                    }
+                }
+              
                 var reviewResponse = {
-                    "T_City": Tenant.Count >0 ? Tenant.Items[0].T_City : ' ',
-                    "T_State": Tenant.Count >0? Tenant.Items[0].T_State : ' ',
+                    "T_City": Tenant.Count > 0 ? Tenant.Items[0].T_City : ' ',
+                    "T_State": Tenant.Count > 0 ? Tenant.Items[0].T_State : ' ',
                     "PR_Types": item.PR_Types,
-                    "PR_Title":item.PR_Title,
+                    "PR_Title": item.PR_Title,
                     "PR_Created_Date": item.PR_Created_Date,
                     "PR_Condition": item.PR_Condition,
                     "PR_Approval": item.PR_Approval,
-                    "PR_Rating": item.PR_Rating,
-                    "PR_Rental": p_rental
+                    "PR_Rating": item.PR_Rating ,
+                    "PR_Rental": p_rental[0]!= undefined ? {"R_ID": p_rental[0].R_ID} : { }
                 }
 
                 //compute step
@@ -88,10 +102,12 @@ async function getPropertyReview(p_id) {
                 p_approval = p_approval + v_approval;
                 // console.log(item);
                 reviewList.push(reviewResponse)
-              //  console.log("reviewResponse",reviewResponse);
+                //  console.log("reviewResponse",reviewResponse);
             }
             p_result.Items[0].P_Reviews = reviewList;
-            p_result.Items[0].P_Approval_Rate = isNaN(p_approval / Review.Count) ? 0 :p_approval / Review.Count; 
+            p_result.Items[0].P_last_Rental_Price = last_r_price;
+            p_result.Items[0].P_End_Date = v_date;
+            p_result.Items[0].P_Approval_Rate = isNaN(p_approval / Review.Count) ? 0 : p_approval / Review.Count;
             p_result.Items[0].P_Avg_Rating = isNaN(p_rating / Review.Count) ? 0 : p_rating / Review.Count;
         }
         console.log("getPropertyReview ended successfully !!!!")
@@ -196,14 +212,14 @@ async function getlandlordReviews(l_id) {
                 console.log("compute step2 ", item);
                 //het the value of each reviw
                 l_recommended = item.LR_Recommend;
-              
+
 
                 //Convert the value of YES OR NO
                 l_recommended = l_recommended == 'yes' ? 1 : 0;
-  
+
                 console.log("compute step3 ", l_recommended);
                 //YES oR NO
-    
+
                 L_Recommended_Rate = L_Recommended_Rate + l_recommended;
                 console.log("compute step4 ", L_Approval_Rate);
                 //Computation
@@ -324,7 +340,7 @@ async function getRental(pr_id) {
         if (Rental.Count > 0) {
 
             for (let r of Rental.Items) {
-                rentals.push({ "R_ID": r.rental_id })
+                rentals.push({ "R_ID": r.R_ID, "R_End_Date": r.R_End_Date, "R_Price": r.R_Price })
             }
         }
         console.log("getRental ended successfully !!!!")
