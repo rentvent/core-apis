@@ -35,7 +35,7 @@ export async function getLandlordbyProperty(event, context, callback) {
 async function GetLandlord(p_params) {
   console.log("GetLandlord begin !!!!!")
   var csd = new AWS.CloudSearchDomain({
-    endpoint: 'search-landlord-hbh2pd23kqbxmavfajjklhhume.us-east-1.cloudsearch.amazonaws.com',
+    endpoint: 'search-landlords-fya3y4pbqgba23u6zmv6fnc43i.us-east-1.cloudsearch.amazonaws.com',
     apiVersion: '2013-01-01'
   });
   var listOfObject = []; var i = 0;
@@ -48,7 +48,11 @@ async function GetLandlord(p_params) {
       listOfObject.push(responseobj);
       i++;
     }
-    console.log(listOfObject);
+    
+    //to get unique value
+    listOfObject.map(item => item.l_id)
+    .filter((value, index, self) => self.indexOf(value) === index);
+
     console.log("GetLandlord  ended successfully !!!");
     return listOfObject;
 

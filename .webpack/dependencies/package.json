@@ -1,0 +1,10 @@
+{
+  "name": "VentRent",
+  "version": "1.0.0",
+  "description": "Packaged externals for VentRent",
+  "private": true,
+  "dependencies": {
+    "babel-runtime": "^6.26.0",
+    "aws-sdk": "^2.179.0"
+  }
+}

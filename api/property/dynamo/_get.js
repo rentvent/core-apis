@@ -122,7 +122,7 @@ async function getlandlord(p_id) {
     console.log("getlandlord begin!!!! ");
     console.log(p_id);
     var csd = new AWS.CloudSearchDomain({
-        endpoint: 'doc-landlord-hbh2pd23kqbxmavfajjklhhume.us-east-1.cloudsearch.amazonaws.com',
+        endpoint: 'search-landlords-fya3y4pbqgba23u6zmv6fnc43i.us-east-1.cloudsearch.amazonaws.com',
         apiVersion: '2013-01-01'
     });
     var params = {
