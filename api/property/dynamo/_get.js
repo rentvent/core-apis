@@ -1,7 +1,8 @@
 import * as dynamoDbLib from "../../../libs/dynamodb-lib";
 import { success, failure } from "../../../libs/response-lib";
+import * as similarity  from "../../../libs/similarity-lib";
 import AWS from "aws-sdk";
-import { ENOTEMPTY } from "constants";
+import _ from "underscore";
 AWS.config.update({ region: "us-east-1" });
 var p_result; var l_result;
 
@@ -26,8 +27,14 @@ export async function getpropertyById(event, context, callback) {
         await getPropertyReview(event.pathParameters.p_id);
 
         await getlandlord(event.pathParameters.p_id);
+        //took the P_address from landlord object , all the object should have the same value 
+        var p_address;
+        if (p_result.Items[0].P_Address_Line1 == undefined)
+            p_address = p_result.Items[0].P_Landlords[0].L_Address_Line1 + ' '+ p_result.Items[0].P_Landlords[0].L_Address_Line2;
+        else
+            p_address = p_result.Items[0].P_Address_Line1
 
-        await getcomplaints(p_result.Items[0].P_Address_Line1);
+        await getcomplaints(p_address);
 
         callback(null, success(p_result));
     } catch (e) {
@@ -44,7 +51,7 @@ async function getPropertyReview(p_id) {
             ":p_id": p_id
         }
     };
-    let v_date, last_r_price = 0 , v_renatl_respone= [] ;
+    let v_date, last_r_price = 0, v_renatl_respone = [];
     try {
         var Review = await dynamoDbLib.call("scan", propertyparams);
         console.log("Review data ", Review);
@@ -72,8 +79,7 @@ async function getPropertyReview(p_id) {
 
                 // compute last_rental_price GET all renatl and get which R_End_Date are the newest one to R_PRICE
                 //if we have reviews but we dont have rental data               
-                if( p_rental[0] != undefined)
-                    {
+                if (p_rental[0] != undefined) {
                     console.log("rent data", p_rental[0].R_End_Date)
                     if (v_date == undefined || v_date < new Date(p_rental[0].R_End_Date)) {
                         console.log("current End Date value - vdate- ", v_date)
@@ -82,7 +88,7 @@ async function getPropertyReview(p_id) {
                         console.log("current last_r_price value", last_r_price)
                     }
                 }
-              
+
                 var reviewResponse = {
                     "T_City": Tenant.Count > 0 ? Tenant.Items[0].T_City : ' ',
                     "T_State": Tenant.Count > 0 ? Tenant.Items[0].T_State : ' ',
@@ -91,8 +97,8 @@ async function getPropertyReview(p_id) {
                     "PR_Created_Date": item.PR_Created_Date,
                     "PR_Condition": item.PR_Condition,
                     "PR_Approval": item.PR_Approval,
-                    "PR_Rating": item.PR_Rating ,
-                    "PR_Rental": p_rental[0]!= undefined ? {"R_ID": p_rental[0].R_ID} : { }
+                    "PR_Rating": item.PR_Rating,
+                    "PR_Rental": p_rental[0] != undefined ? { "R_ID": p_rental[0].R_ID } : {}
                 }
 
                 //compute step
@@ -130,51 +136,60 @@ async function getlandlord(p_id) {
         queryOptions: "{'fields':['l_properties']}"
     };
     var listOfObject = [];
-    var P_Landlords = []
-        ; try {
-            var data = await csd.search(params).promise();
-            console.log(data);
-            var i = 0;
+    var P_Landlords = [];
+    try {
+        var data = await csd.search(params).promise();
+        console.log(data);
+        var i = 0;
 
-            while (i < data.hits.hit.length) {
-                var obj = JSON.parse(JSON.stringify(data.hits.hit[i].fields).replace(/[\[\]']+/g, ''));
-                listOfObject.push(obj);
-                i++;
-            }
-            console.log(listOfObject);
+        while (i < data.hits.hit.length) {
+            var obj = JSON.parse(JSON.stringify(data.hits.hit[i].fields).replace(/[\[\]']+/g, ''));
+            listOfObject.push(obj);
+            i++;
+        }
+        console.log(listOfObject);
 
-            for (let v_landlord of listOfObject) {
-                var p_land;
-                const l_params = {
-                    TableName: 'Landlord',
-                    KeyConditionExpression: "L_ID = :l_id",
-                    ExpressionAttributeValues: {
-                        ":l_id": v_landlord.l_id
-                    }
-                };
-                console.log(v_landlord.l_id);
-                //get landlord data
-                l_result = await dynamoDbLib.call("query", l_params);
-                console.log("First Step ", l_result);
+        //to get unique value
+        var uniques = _.map(_.groupBy(listOfObject, function (doc) {
+            return doc.L_ID;
+        }), function (grouped) {
+            return grouped[0];
+        });
+
+        console.log("GetLandlord  ended successfully !!!");
+
+        for (let v_landlord of uniques) {
+            var p_land;
+            const l_params = {
+                TableName: 'Landlord',
+                KeyConditionExpression: "L_ID = :l_id",
+                ExpressionAttributeValues: {
+                    ":l_id": v_landlord.l_id
+                }
+            };
+            console.log(v_landlord.l_id);
+            //get landlord data
+            l_result = await dynamoDbLib.call("query", l_params);
+            console.log("First Step ", l_result);
 
 
-                console.log("second Step get Landlord Review");
-                var landlordReviews = await getlandlordReviews(v_landlord.l_id);
+            console.log("second Step get Landlord Review");
+            var landlordReviews = await getlandlordReviews(v_landlord.l_id);
 
-                p_land = l_result.Items[0];
-                p_land.Landlord_Reviews = landlordReviews != undefined ? landlordReviews.Landlord_Reviews : [];
-                p_land.L_Response_Rate = landlordReviews != undefined ? landlordReviews.L_Response_Rate : 0;
-                p_land.L_Avg_Rating = landlordReviews != undefined ? landlordReviews.L_Avg_Rating : 0;
-                p_land.L_Approval_Rate = landlordReviews != undefined ? landlordReviews.L_Approval_Rate : 0;
-                p_land.LR_Repair_Requests = landlordReviews != undefined ? landlordReviews.LR_Repair_Requests : 0;
+            p_land = l_result.Items[0];
+            p_land.Landlord_Reviews = landlordReviews != undefined ? landlordReviews.Landlord_Reviews : [];
+            p_land.L_Response_Rate = landlordReviews != undefined ? landlordReviews.L_Response_Rate : 0;
+            p_land.L_Avg_Rating = landlordReviews != undefined ? landlordReviews.L_Avg_Rating : 0;
+            p_land.L_Approval_Rate = landlordReviews != undefined ? landlordReviews.L_Approval_Rate : 0;
+            p_land.LR_Repair_Requests = landlordReviews != undefined ? landlordReviews.LR_Repair_Requests : 0;
 
-                P_Landlords.push(p_land);
-
-            }
-            p_result.Items[0].P_Landlords = P_Landlords;
-            console.log("getlandlord ended successfully!!!! ");
+            P_Landlords.push(p_land);
 
         }
+        p_result.Items[0].P_Landlords = P_Landlords;
+        console.log("getlandlord ended successfully!!!! ");
+
+    }
     catch (err) {
         console.log(err, err.stack); // an error occurred
         return err;
@@ -291,7 +306,7 @@ async function getcomplaints(p_address) {
     });
     var params = {
         query: p_address,
-        queryOptions: "{'fields':['c_address_line1']}"
+        queryOptions: "{'fields':['c_address_line1'],'defaultOperator':'or'}"
     };
     var listOfObject = [];
     try {
@@ -304,15 +319,32 @@ async function getcomplaints(p_address) {
             listOfObject.push(obj);
             i++;
         }
-        console.log(listOfObject);
+      //  console.log(listOfObject);
+
+        //to get unique value
+        var uniques = _.map(_.groupBy(listOfObject, function (doc) {
+            return doc.c_id;
+        }), function (grouped) {
+            return grouped[0];
+        });
 
         var p_complaints = [];
-        for (let comp of listOfObject) {
-            console.log(comp.c_id);
-            p_complaints.push(comp.c_id);
+        for (let comp of uniques) {
+            console.log("inside uniques for loop " ,p_address);
+            console.log("are they similer",comp.c_address_line1.trim());
+            var similarityPercentage = await similarity.checksimilarity(p_address, comp.c_address_line1.trim())
+
+            if (similarityPercentage > 0.6)
+                p_complaints.push({ "C_ID": comp.c_id
+                // ,"C_add": comp.c_address_line1
+                 //,"similarityPercentage":similarityPercentage 
+                });
+
         }
 
         p_result.Items[0].P_Complaints = p_complaints;
+
+
 
         console.log("getcomplaintsObj ended successfully!!!! ");
     }

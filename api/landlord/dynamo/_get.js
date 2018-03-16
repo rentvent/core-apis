@@ -1,6 +1,8 @@
 import * as dynamoDbLib from "../../../libs/dynamodb-lib";
 import { success, failure } from "../../../libs/response-lib";
+import * as similarity from "../../../libs/similarity-lib";
 import AWS from "aws-sdk";
+import _ from "underscore";
 AWS.config.update({ region: "us-east-1" });
 // global varible for get landlord detailes 
 var l_result;
@@ -68,14 +70,14 @@ export async function getlandlordReviews(l_id) {
                 console.log("compute step2 ", item);
                 //het the value of each reviw
                 l_recommended = item.LR_Recommend;
-         
+
 
                 //Convert the value of YES OR NO
                 l_recommended = l_recommended == 'yes' ? 1 : 0;
-               
+
                 console.log("compute step3 ", l_recommended);
                 //YES oR NO
-                
+
                 L_Recommended_Rate = L_Recommended_Rate + l_recommended;
                 console.log("compute step4 ", L_Approval_Rate);
                 //Computation
@@ -115,7 +117,7 @@ export async function getlandlordReviews(l_id) {
             }
         }
         console.log("ReviewResponseList", ReviewResponseList.length);
-      
+
         l_result.Items[0].Landlord_Reviews = ReviewResponseList.length > 0 ? ReviewResponseList : [];
 
 
@@ -124,7 +126,7 @@ export async function getlandlordReviews(l_id) {
         l_result.Items[0].L_Avg_Rating = isNaN(L_Avg_Rating / Review.Count) ? 0 : L_Avg_Rating / Review.Count;
         l_result.Items[0].L_Approval_Rate = isNaN(L_Recommended_Rate / Review.Count) ? 0 : L_Recommended_Rate / Review.Count;
         l_result.Items[0].LR_Repair_Requests = isNaN(LR_Repair_Requests / Review.Count) ? 0 : LR_Repair_Requests / Review.Count;
-     
+
         console.log("getlandlordReviews ended successfully !!!")
 
     }
@@ -180,21 +182,46 @@ export async function getProperties() {
                         console.log("item.P_Address_Line1", item.P_Address_Line1);
 
                         console.log("forth Step get  prperties complaints");
-                        var complaints = await getcomplaints(item.P_Address_Line1);
+
+                        var complaints = [];
+                        var p_add;
+                        if (item.P_Address_Line1 != undefined)
+                            p_add = item.P_Address_Line1
+                        else
+                            p_add = l_result.Items[0].L_Address_Line1 + ' ' + l_result.Items[0].L_Address_Line2;
+
+                        complaints = await getcomplaints(p_add);
                         console.log("complaints", complaints);
 
                         if (complaints.length > 0) {
+
+                            //to get unique value
+                            var uniques = _.map(_.groupBy(complaints, function (doc) {
+                                return doc.c_id;
+                            }), function (grouped) {
+                                return grouped[0];
+                            });
+
                             console.log("we have complains for this property ");
-                            for (let comp of complaints) {
-                                //build the object
-                                var complaintsObj = {
-                                    'C_ID': comp.c_id
-                                };
-                                L_Complaints.push(complaintsObj);
+                            for (let comp of uniques) {
+                  
+                                var similarityPercentage = await similarity.checksimilarity(p_add, comp.c_address_line1);
+                                console.log("test",similarityPercentage);
+                                if (similarityPercentage > 0.6) {
+                                    //build the object
+                                    var complaintsObj = {
+                                        'C_ID': comp.c_id,
+                                        //'similarty': similarityPercentage,
+                                        //'address': comp.c_address_line1,
+                                        //'case number': comp.c_case_number
+                                    };
+                                    L_Complaints.push(complaintsObj);
+                                }
                             }
                         }
+
                         //get property review 
-                        console.log("fifth Step get  prperties reviews",item.P_ID);
+                        console.log("fifth Step get  prperties reviews", item.P_ID);
                         var propertiesReview = await getproprtyReview(item.P_ID)
 
                         // prepare property response
@@ -233,7 +260,8 @@ export async function getcomplaints(p_address) {
         apiVersion: '2013-01-01'
     });
     var params = {
-        query: p_address
+        query: p_address,
+        queryOptions: "{'fields':['c_address_line1'],'defaultOperator':'or'}"
     };
     var listOfObject = [];
     try {
@@ -246,6 +274,7 @@ export async function getcomplaints(p_address) {
             listOfObject.push(obj);
             i++;
         }
+
         console.log(listOfObject);
         console.log("getcomplaintsObj ended successfully!!!! ");
         return listOfObject;
@@ -274,8 +303,7 @@ export async function getproprtyReview(p_id) {
 
             //compute the avg rating for property
             console.log("before loop");
-            for(let pr_reveiw of propertiesReview.Items )
-            {
+            for (let pr_reveiw of propertiesReview.Items) {
                 console.log("inside loop");
                 sum_prop_avg += pr_reveiw.PR_Rating
             }
