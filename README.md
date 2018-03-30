@@ -44,8 +44,8 @@ Please note :  the node_model already pushed in reposotiry
 ``` sls remove ```
 
 
-# EndPoint :
-* CloudSearch :**
+# EndPoint
+* CloudSearch
   
   - Get landlord by name <br />
     https://rm9ikv7dkc.execute-api.us-east-1.amazonaws.com/prod/Vent.Rent/landlord/cloudsearch/{p_name}
