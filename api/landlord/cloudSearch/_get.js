@@ -2,6 +2,7 @@ import { success, failure } from "../../../libs/response-lib";
 import AWS from "aws-sdk";
 AWS.config.update({ region: "us-east-1" });
 import _ from "underscore";
+
 export async function getLandlordSearch(event, context, callback) {
   try {
     var p_name = decodeURIComponent(decodeURIComponent(event["pathParameters"]["p_name"]));
