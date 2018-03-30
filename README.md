@@ -47,28 +47,28 @@ Please note :  the node_model already pushed in reposotiry
 # EndPoint :
 * CloudSearch :**
   
-  1. get landlord by name <br />
+  - get landlord by name <br />
     https://rm9ikv7dkc.execute-api.us-east-1.amazonaws.com/prod/Vent.Rent/landlord/cloudsearch/{p_name}
-  2. get landlord by property address<br />
+  - get landlord by property address<br />
     https://rm9ikv7dkc.execute-api.us-east-1.amazonaws.com/prod/Vent.Rent/landlord/property/{lp_address} 
-  3.  get complaints by address<br />
+  -  get complaints by address<br />
     https://rm9ikv7dkc.execute-api.us-east-1.amazonaws.com/prod/Vent.Rent/Complaints/cloudsearch/{p_address}
 
 * DynamoDB:
   
-  4. get landlord Info by ID <br />
+  - get landlord Info by ID <br />
    https://rm9ikv7dkc.execute-api.us-east-1.amazonaws.com/prod/Vent.Rent/landlord/{l_id}
-  5. get property Info by ID<br /> 
+  - get property Info by ID<br /> 
    https://rm9ikv7dkc.execute-api.us-east-1.amazonaws.com/prod/Vent.Rent/property/{p_id}
-  6. get complaints by ID <br />
+  - get complaints by ID <br />
    https://rm9ikv7dkc.execute-api.us-east-1.amazonaws.com/prod/Vent.Rent/Complaints/{c_id}
-  7. get rental by ID <br />
+  - get rental by ID <br />
    https://rm9ikv7dkc.execute-api.us-east-1.amazonaws.com/prod/Vent.Rent/rental/{r_id}
-  8. get question <br />
+  - get question <br />
     https://rm9ikv7dkc.execute-api.us-east-1.amazonaws.com/prod/Vent.Rent/question/{q_type}/{search_by}/{search_val}
-  9. post questionner <br />
+  - post questionner <br />
    https://rm9ikv7dkc.execute-api.us-east-1.amazonaws.com/prod/Vent.Rent/questionnaire
-  10. post tenant <br />
+  - post tenant <br />
    https://rm9ikv7dkc.execute-api.us-east-1.amazonaws.com/prod/Vent.Rent/tenant
 
 # Examples: 
