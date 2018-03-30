@@ -47,41 +47,27 @@ Please note :  the node_model already pushed in reposotiry
 # EndPoint :
 * CloudSearch :**
   
-  - get landlord by name <br />
+  - Get landlord by name <br />
     https://rm9ikv7dkc.execute-api.us-east-1.amazonaws.com/prod/Vent.Rent/landlord/cloudsearch/{p_name}
-  - get landlord by property address<br />
+  - Get landlord by property address<br />
     https://rm9ikv7dkc.execute-api.us-east-1.amazonaws.com/prod/Vent.Rent/landlord/property/{lp_address} 
-  -  get complaints by address<br />
+  - Get complaints by address<br />
     https://rm9ikv7dkc.execute-api.us-east-1.amazonaws.com/prod/Vent.Rent/Complaints/cloudsearch/{p_address}
 
 * DynamoDB:
   
-  - get landlord Info by ID <br />
+  - Get landlord Info by ID <br />
    https://rm9ikv7dkc.execute-api.us-east-1.amazonaws.com/prod/Vent.Rent/landlord/{l_id}
-  - get property Info by ID<br /> 
+  - Get property Info by ID<br /> 
    https://rm9ikv7dkc.execute-api.us-east-1.amazonaws.com/prod/Vent.Rent/property/{p_id}
-  - get complaints by ID <br />
+  - Get complaints by ID <br />
    https://rm9ikv7dkc.execute-api.us-east-1.amazonaws.com/prod/Vent.Rent/Complaints/{c_id}
-  - get rental by ID <br />
+  - Get rental by ID <br />
    https://rm9ikv7dkc.execute-api.us-east-1.amazonaws.com/prod/Vent.Rent/rental/{r_id}
-  - get question <br />
+  - Get question <br />
     https://rm9ikv7dkc.execute-api.us-east-1.amazonaws.com/prod/Vent.Rent/question/{q_type}/{search_by}/{search_val}
-  - post questionner <br />
+  - Post questionner <br />
    https://rm9ikv7dkc.execute-api.us-east-1.amazonaws.com/prod/Vent.Rent/questionnaire
-  - post tenant <br />
+  - Post tenant <br />
    https://rm9ikv7dkc.execute-api.us-east-1.amazonaws.com/prod/Vent.Rent/tenant
-
-# Examples: 
-get landlord by address 
-
-https://rm9ikv7dkc.execute-api.us-east-1.amazonaws.com/prod/Vent.Rent/landlord/property/333%20CROWN%20DR
-
-get land landlord by ID 
-
-https://rm9ikv7dkc.execute-api.us-east-1.amazonaws.com/prod/Vent.Rent/landlord/2280022031
-
-
-get property by ID 
-https://rm9ikv7dkc.execute-api.us-east-1.amazonaws.com/prod/Vent.Rent/property/2280022031
-
  
