@@ -11,7 +11,7 @@
 ```
 3. Credentials Configuration
 ```
-serverless config credentials --provider aws --key ****** --secret ****+******** --profile rent.vent
+serverless config credentials --provider aws --key ****** --secret ****+******** --profile rv_nonprod
 ```
 More details/Video Tutorial on how to create IAM user and more on configuring AWS credentials can be found [here](https://serverless.com/framework/docs/providers/aws/guide/credentials/). 
 
@@ -36,8 +36,8 @@ Please note :  the node_model already pushed in reposotiry
   ### Deploy the project
 * Deploying function to AWS**
 
-``` sls deploy  ```:  “deploy all lambda functions “ 
-```sls deployfunction -f FuncName ``` : “ Deploy just one function “
+``` sls deploy  ```:  Deploy all lambda functions
+```sls deployfunction -f FuncName ``` : Deploy one function
 
 *  Delete Stack :
 
