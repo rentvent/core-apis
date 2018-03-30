@@ -45,19 +45,19 @@ Please note :  the node_model already pushed in reposotiry
 
 
 # EndPoint :
-  * CloudSearch :
+  * CloudSearch :**
   
-1. get landlord by name
+1. get landlord by name__
     https://rm9ikv7dkc.execute-api.us-east-1.amazonaws.com/prod/Vent.Rent/landlord/cloudsearch/{p_name}
-2. get landlord by property address
+2. get landlord by property address__
     https://rm9ikv7dkc.execute-api.us-east-1.amazonaws.com/prod/Vent.Rent/landlord/property/{lp_address}
   
-3.  get complaints by address
+3.  get complaints by address__
     https://rm9ikv7dkc.execute-api.us-east-1.amazonaws.com/prod/Vent.Rent/Complaints/cloudsearch/{p_address}
 
   * DynamoDB:
   
-4. get landlord Info by ID   
+4. get landlord Info by ID __ 
    https://rm9ikv7dkc.execute-api.us-east-1.amazonaws.com/prod/Vent.Rent/landlord/{l_id}
 5. get property Info by ID 
    https://rm9ikv7dkc.execute-api.us-east-1.amazonaws.com/prod/Vent.Rent/property/{p_id}
