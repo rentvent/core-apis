@@ -4,7 +4,7 @@
 
 #### Prerequisites 
 
-1. NodeJS 6.10
+1. NodeJS 6.10 or later
 2. Serverless Framework 1.23 :
 ```
  npm i -g serverless
