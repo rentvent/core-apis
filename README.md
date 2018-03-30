@@ -24,11 +24,11 @@ Please note :  the node_model already pushed in reposotiry
 
 2.1 Testing api gateway locally
 
- 1. install serverless offline :
+ 1. Install serverless offline :
  ```
  npm install serverless-offline -D
 ```
- 2. start the server :
+ 2. Start the server :
 ```
  sls offline start
 ```
